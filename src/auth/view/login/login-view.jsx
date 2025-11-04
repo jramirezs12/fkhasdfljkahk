@@ -2,11 +2,10 @@
 
 import * as z from 'zod';
 import { useState } from 'react';
-//import { useForm } from 'react-hook-form';
-import { useBoolean } from 'minimal-shared/hooks';
-import { useLogin } from '@/hooks/useLogin';
-import { useAuthStore } from '@/store/authStore';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import { useBoolean } from 'minimal-shared/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -15,24 +14,19 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { Iconify } from 'src/components/iconify';
-import { Form, Field, schemaUtils } from 'src/components/hook-form';
-
-import { getErrorMessage } from '../../utils';
-import { FormHead } from '../../components/form-head';
-/*
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
+import { useLogin } from 'src/hooks/useLogin';
+
+import { useAuthStore } from 'src/store/authStore';
+
 import { Iconify } from 'src/components/iconify';
 import { Form, Field, schemaUtils } from 'src/components/hook-form';
 
-import { useAuthContext } from '../../hooks';
 import { getErrorMessage } from '../../utils';
 import { FormHead } from '../../components/form-head';
-import { signInWithPassword } from '../../context/jwt';
-*/
+
 // ----------------------------------------------------------------------
 
 export const SignInSchema = z.object({
@@ -47,21 +41,22 @@ export const SignInSchema = z.object({
 
 export default function LoginView() {
   const router = useRouter();
-  const { mutateAsync, isPending, isError } = useLogin();
+
+    const defaultValues = {
+    email: '',
+    password: ''
+  };
+  const { mutateAsync } = useLogin();
   const setToken = useAuthStore((state) => state.setToken);
 
   const showPassword = useBoolean();
 
-  //const { checkUserSession } = useAuthContext();
-
   const [errorMessage, setErrorMessage] = useState(null);
 
-  /*
   const methods = useForm({
     resolver: zodResolver(SignInSchema),
     defaultValues,
   });
-  */
 
   const {
     handleSubmit,
@@ -137,7 +132,7 @@ export default function LoginView() {
         title="Ingresa a tu cuenta"
         description={
           <>
-            {`Si aún no tienes una cuenta`}
+            Si aún no tienes una cuenta
             <Link component={RouterLink} href={paths.auth.jwt.signUp} variant="subtitle2">
               Regístrate aquí
             </Link>

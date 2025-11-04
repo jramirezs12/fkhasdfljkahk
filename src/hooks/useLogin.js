@@ -1,6 +1,7 @@
 import { gql } from 'graphql-request';
-import graphqlClient from '@/lib/graphqlClient';
 import { useMutation } from '@tanstack/react-query';
+
+import graphqlClient from 'src/lib/graphqlClient';
 
 
 
@@ -15,11 +16,9 @@ const LOGIN_MUTATION = gql`
     }
 `;
 
-export const useLogin = () => {
-    return useMutation({
+export const useLogin = () => useMutation({
         mutationFn: async ({ email, password }) => {
             const data = await graphqlClient.request(LOGIN_MUTATION, { email, password });
             return data.generateCustomerToken.token;
         },
     });
-};

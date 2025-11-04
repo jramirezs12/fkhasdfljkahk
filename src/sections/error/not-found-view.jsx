@@ -41,7 +41,7 @@ export function NotFoundView() {
         </m.div>
 
         <Button component={RouterLink} href="/" size="large" variant="contained">
-          Go to home
+          Ir al inicio
         </Button>
       </Container>
     </SimpleLayout>

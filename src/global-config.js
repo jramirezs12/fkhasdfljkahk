@@ -12,10 +12,10 @@ export const CONFIG = {
   isStaticExport: JSON.parse(process.env.BUILD_STATIC_EXPORT ?? 'false'),
   /**
    * Auth
-   * @method jwt | amplify | firebase | supabase | auth0
+   * @method login | amplify | firebase | supabase | auth0
    */
   auth: {
-    method: 'jwt',
+    method: 'login',
     skip: false,
     redirectPath: paths.dashboard.root,
   },

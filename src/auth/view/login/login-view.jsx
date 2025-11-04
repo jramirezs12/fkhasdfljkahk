@@ -1,9 +1,9 @@
 'use client';
 
 import * as z from 'zod';
+import Cookies from 'js.cookie';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import { useBoolean } from 'minimal-shared/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -16,18 +16,22 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
 
 import { useLogin } from 'src/hooks/useLogin';
 
+import axios from 'src/lib/axios';
 import { useAuthStore } from 'src/store/authStore';
 
 import { Iconify } from 'src/components/iconify';
 import { Form, Field, schemaUtils } from 'src/components/hook-form';
 
+import { useAuthContext } from 'src/auth/hooks';
+import { setSession } from 'src/auth/context/jwt/utils';
+import { JWT_STORAGE_KEY } from 'src/auth/context/jwt/constant';
+
 import { getErrorMessage } from '../../utils';
 import { FormHead } from '../../components/form-head';
-
-// ----------------------------------------------------------------------
 
 export const SignInSchema = z.object({
   email: schemaUtils.email(),
@@ -37,20 +41,17 @@ export const SignInSchema = z.object({
     .min(6, { message: 'Contraseña tener al menos 6 caracteres!' }),
 });
 
-// ----------------------------------------------------------------------
-
 export default function LoginView() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams?.get('returnTo') || '/dashboard';
 
-    const defaultValues = {
-    email: '',
-    password: ''
-  };
+  const defaultValues = { email: '', password: '' };
   const { mutateAsync } = useLogin();
   const setToken = useAuthStore((state) => state.setToken);
+  const { checkUserSession } = useAuthContext();
 
   const showPassword = useBoolean();
-
   const [errorMessage, setErrorMessage] = useState(null);
 
   const methods = useForm({
@@ -66,8 +67,22 @@ export default function LoginView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const token = await mutateAsync({ email: data.email, password: data.password });
+
       setToken(token);
-      router.push('/dashboard');
+
+      Cookies.set('accessToken', token, { path: '/', sameSite: 'lax' });
+
+      try {
+        await setSession(token);
+      } catch (e) {
+        sessionStorage.setItem(JWT_STORAGE_KEY, token);
+        axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+      }
+
+      await checkUserSession?.();
+      
+      router.replace(returnTo);
+      router.refresh();
     } catch (error) {
       console.error(error);
       const feedbackMessage = getErrorMessage(error);
@@ -77,8 +92,11 @@ export default function LoginView() {
 
   const renderForm = () => (
     <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
-      <Field.Text name="email" label="Correo electrónico" slotProps={{ inputLabel: { shrink: true } }} />
-
+      <Field.Text
+        name="email"
+        label="Correo electrónico"
+        slotProps={{ inputLabel: { shrink: true } }}
+      />
       <Box sx={{ gap: 1.5, display: 'flex', flexDirection: 'column' }}>
         <Link
           component={RouterLink}
@@ -89,11 +107,9 @@ export default function LoginView() {
         >
           ¿Olvidaste tu contraseña?
         </Link>
-
         <Field.Text
           name="password"
           label="Contraseña"
-          placeholder=""
           type={showPassword.value ? 'text' : 'password'}
           slotProps={{
             inputLabel: { shrink: true },
@@ -111,7 +127,6 @@ export default function LoginView() {
           }}
         />
       </Box>
-
       <Button
         fullWidth
         color="inherit"
@@ -140,13 +155,11 @@ export default function LoginView() {
         }
         sx={{ textAlign: { xs: 'center', md: 'left' } }}
       />
-
       {!!errorMessage && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {errorMessage}
         </Alert>
       )}
-
       <Form methods={methods} onSubmit={onSubmit}>
         {renderForm()}
       </Form>

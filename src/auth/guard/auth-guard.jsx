@@ -19,6 +19,7 @@ const signInPaths = {
   amplify: paths.auth.amplify.signIn,
   firebase: paths.auth.firebase.signIn,
   supabase: paths.auth.supabase.signIn,
+  login: paths.auth.login,
 };
 
 export function AuthGuard({ children }) {
@@ -34,6 +35,7 @@ export function AuthGuard({ children }) {
     return `${currentPath}?${queryString}`;
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const checkPermissions = async () => {
     if (loading) {
       return;
@@ -55,8 +57,7 @@ export function AuthGuard({ children }) {
 
   useEffect(() => {
     checkPermissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticated, loading]);
+  }, [authenticated, checkPermissions, loading]);
 
   if (isChecking) {
     return <SplashScreen />;

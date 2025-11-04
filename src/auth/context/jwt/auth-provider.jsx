@@ -1,21 +1,24 @@
 'use client';
 
+import { gql } from 'graphql-request';
 import { useSetState } from 'minimal-shared/hooks';
 import { useMemo, useEffect, useCallback } from 'react';
 
-import axios, { endpoints } from 'src/lib/axios';
+import graphqlClient from 'src/lib/graphqlClient';
 
 import { JWT_STORAGE_KEY } from './constant';
 import { AuthContext } from '../auth-context';
 import { setSession, isValidToken } from './utils';
 
-// ----------------------------------------------------------------------
-
-/**
- * NOTE:
- * We only build demo at basic level.
- * Customer will need to do some extra handling yourself if you want to extend the logic and other features...
- */
+const ME_QUERY = gql`
+mutation get_token($email: String!, $password: String!){
+  generateCustomerToken(email:$email,
+    password: $password
+  ) {
+    token
+  }
+}
+`;
 
 export function AuthProvider({ children }) {
   const { state, setState } = useSetState({ user: null, loading: true });
@@ -25,31 +28,30 @@ export function AuthProvider({ children }) {
       const accessToken = sessionStorage.getItem(JWT_STORAGE_KEY);
 
       if (accessToken && isValidToken(accessToken)) {
-        setSession(accessToken);
+        await setSession(accessToken);
 
-        const res = await axios.get(endpoints.auth.me);
+        const res = await graphqlClient.request(ME_QUERY);
 
-        const { user } = res.data;
+        const user = {
+          ...res?.customer,
+          accessToken,
+        };
 
-        setState({ user: { ...user, accessToken }, loading: false });
+        setState({ user, loading: false });
       } else {
         setState({ user: null, loading: false });
       }
     } catch (error) {
-      console.error(error);
+      console.error('checkUserSession error:', error);
       setState({ user: null, loading: false });
     }
   }, [setState]);
 
   useEffect(() => {
     checkUserSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ----------------------------------------------------------------------
+  }, [checkUserSession]);
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
-
   const status = state.loading ? 'loading' : checkAuthenticated;
 
   const memoizedValue = useMemo(

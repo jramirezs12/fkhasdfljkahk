@@ -1,24 +1,31 @@
-import { gql } from 'graphql-request';
+'use client';
+
 import { useMutation } from '@tanstack/react-query';
 
-import graphqlClient from 'src/lib/graphqlClient';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
 
+import { useAuthStore } from 'src/store/authStore';
 
+import { useAuthContext } from 'src/auth/hooks';
+import { signInWithPassword } from 'src/auth/context/login';
 
-const LOGIN_MUTATION = gql`
-    mutation GenerateCustomerToken($email: String!, $password: String!){
-        generateCustomerToken(
-            email:$email,
-            password: $password
-        ) {
-            token
-        }
-    }
-`;
+export function useLogin() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams?.get('returnTo') || '/dashboard';
 
-export const useLogin = () => useMutation({
-        mutationFn: async ({ email, password }) => {
-            const data = await graphqlClient.request(LOGIN_MUTATION, { email, password });
-            return data.generateCustomerToken.token;
-        },
-    });
+  const setToken = useAuthStore((s) => s.setToken);
+  const { checkUserSession } = useAuthContext();
+
+  return useMutation({
+    mutationFn: signInWithPassword,
+    onSuccess: async (token) => {
+      setToken(token);
+      await checkUserSession?.();
+      router.replace(returnTo);
+      router.refresh();
+    },
+  });
+}
+
+export default useLogin;

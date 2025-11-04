@@ -49,14 +49,14 @@ export function AccountPopover({ data = [], sx, ...other }) {
 
       <MenuList sx={{ p: 1, my: 1, '& li': { p: 0 } }}>
         {data.map((option) => {
-          const rootLabel = pathname.includes('/dashboard') ? 'Home' : 'Dashboard';
+          const rootLabel = pathname.includes('/dashboard') ? 'Inicio' : 'Dashboard';
           const rootHref = pathname.includes('/dashboard') ? '/' : paths.dashboard.root;
 
           return (
             <MenuItem key={option.label}>
               <Link
                 component={RouterLink}
-                href={option.label === 'Home' ? rootHref : option.href}
+                href={option.label === 'Inicio' ? rootHref : option.href}
                 color="inherit"
                 underline="none"
                 onClick={onClose}
@@ -75,7 +75,7 @@ export function AccountPopover({ data = [], sx, ...other }) {
                 {option.icon}
 
                 <Box component="span" sx={{ ml: 2 }}>
-                  {option.label === 'Home' ? rootLabel : option.label}
+                  {option.label === 'Inicio' ? rootLabel : option.label}
                 </Box>
 
                 {option.info && (

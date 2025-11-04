@@ -7,7 +7,6 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Avatar from '@mui/material/Avatar';
 import Drawer from '@mui/material/Drawer';
-import Tooltip from '@mui/material/Tooltip';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
@@ -17,14 +16,12 @@ import { paths } from 'src/routes/paths';
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
-import { _mock } from 'src/_mock';
-
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { AnimateBorder } from 'src/components/animate';
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks';
 
 import { UpgradeBlock } from './nav-upgrade';
 import { AccountButton } from './account-button';
@@ -34,10 +31,30 @@ import { SignOutButton } from './sign-out-button';
 
 export function AccountDrawer({ data = [], sx, ...other }) {
   const pathname = usePathname();
-
-  const { user } = useMockedUser();
-
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
+
+  const { user } = useAuthContext();
+
+  const firstName = (user?.firstName ?? user?.firstname ?? '').trim();
+  const lastName = (user?.lastName ?? user?.lastname ?? '').trim();
+  const email = user?.email || '';
+
+  const displayName =
+    user?.displayName ||
+    [firstName, lastName].filter(Boolean).join(' ') ||
+    email ||
+    'Usuario';
+
+  const initials = (() => {
+    if (firstName || lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    if (user?.displayName) {
+      const parts = user.displayName.trim().split(/\s+/);
+      return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || (email?.[0] ?? 'U').toUpperCase();
+    }
+    return (email?.[0] ?? 'U').toUpperCase();
+  })();
 
   const renderAvatar = () => (
     <AnimateBorder
@@ -46,8 +63,8 @@ export function AccountDrawer({ data = [], sx, ...other }) {
         primaryBorder: { size: 120, sx: { color: 'primary.main' } },
       }}
     >
-      <Avatar src={user?.photoURL} alt={user?.displayName} sx={{ width: 1, height: 1 }}>
-        {user?.displayName?.charAt(0).toUpperCase()}
+      <Avatar alt={displayName} sx={{ width: 1, height: 1 }}>
+        {initials}
       </Avatar>
     </AnimateBorder>
   );
@@ -110,8 +127,8 @@ export function AccountDrawer({ data = [], sx, ...other }) {
     <>
       <AccountButton
         onClick={onOpen}
-        photoURL={user?.photoURL}
-        displayName={user?.displayName}
+        photoURL={undefined}
+        displayName={displayName}
         sx={sx}
         {...other}
       />
@@ -149,15 +166,15 @@ export function AccountDrawer({ data = [], sx, ...other }) {
             {renderAvatar()}
 
             <Typography variant="subtitle1" noWrap sx={{ mt: 2 }}>
-              {user?.displayName}
+              {displayName}
             </Typography>
 
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }} noWrap>
-              {user?.email}
+              {email}
             </Typography>
           </Box>
 
-          <Box
+          {/* <Box
             sx={{
               p: 3,
               gap: 1,
@@ -191,7 +208,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
                 <Iconify icon="mingcute:add-line" />
               </IconButton>
             </Tooltip>
-          </Box>
+          </Box> */}
 
           {renderList()}
 

@@ -39,17 +39,32 @@ export const paths = {
       updatePassword: `${ROOTS.AUTH}/supabase/update-password`,
       resetPassword: `${ROOTS.AUTH}/supabase/reset-password`,
     },
-    login: `${ROOTS.AUTH}/login`
+    login: `${ROOTS.AUTH}/login`,
   },
   // DASHBOARD
   dashboard: {
     root: ROOTS.DASHBOARD,
     two: `${ROOTS.DASHBOARD}/two`,
     three: `${ROOTS.DASHBOARD}/three`,
-    group: {
-      root: `${ROOTS.DASHBOARD}/group`,
-      five: `${ROOTS.DASHBOARD}/group/five`,
-      six: `${ROOTS.DASHBOARD}/group/six`,
+    user: {
+      root: `${ROOTS.DASHBOARD}/user`,
+      new: `${ROOTS.DASHBOARD}/user/new`,
+      list: `${ROOTS.DASHBOARD}/user/list`,
+      cards: `${ROOTS.DASHBOARD}/user/cards`,
+      profile: `${ROOTS.DASHBOARD}/user/profile`,
+      account: `${ROOTS.DASHBOARD}/user/account`,
+      edit: (id) => `${ROOTS.DASHBOARD}/user/${id}/edit`,
+      demo: { edit: `${ROOTS.DASHBOARD}/user/edit` }, // TODO: Corregir al id antes del edit
+    },
+    product: {
+      root: `${ROOTS.DASHBOARD}/product`,
+      new: `${ROOTS.DASHBOARD}/product/new`,  
+      details: (id) => `${ROOTS.DASHBOARD}/product/${id}`,
+      edit: (id) => `${ROOTS.DASHBOARD}/product/${id}/edit`,
+      demo: {
+        details: `${ROOTS.DASHBOARD}/product/`, // TODO: Corregir al id antes del edit
+        edit: `${ROOTS.DASHBOARD}/product/edit`, // TODO: Corregir al id antes del edit
+      },
     },
   },
 };

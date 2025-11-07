@@ -13,6 +13,7 @@ import { CONFIG } from 'src/global-config';
 import { Label } from 'src/components/label';
 
 import { useMockedUser } from 'src/auth/hooks';
+import { RouterLink } from 'src/routes/components';
 
 // ----------------------------------------------------------------------
 
@@ -55,7 +56,7 @@ export function NavUpgrade({ sx, ...other }) {
             {user?.displayName}
           </Typography>
 
-          <Typography
+        <Typography
             variant="body2"
             noWrap
             sx={{ color: 'var(--layout-nav-text-disabled-color)' }}
@@ -111,6 +112,7 @@ export function UpgradeBlock({ sx, ...other }) {
         })}
       />
 
+      {/*
       <Box
         component={m.img}
         animate={{ y: [12, -12, 12] }}
@@ -129,6 +131,7 @@ export function UpgradeBlock({ sx, ...other }) {
           position: 'absolute',
         }}
       />
+      */}
 
       <Box
         sx={{
@@ -139,7 +142,7 @@ export function UpgradeBlock({ sx, ...other }) {
         }}
       >
         <Box component="span" sx={{ typography: 'h5', color: 'common.white' }}>
-          35% OFF
+          Completa tu registro
         </Box>
 
         <Box
@@ -151,11 +154,17 @@ export function UpgradeBlock({ sx, ...other }) {
             typography: 'subtitle2',
           }}
         >
-          Power up Productivity!
+          Recuerda que debes completar tu registro para disfrutar de todas las funcionalidades.
         </Box>
 
-        <Button variant="contained" size="small" color="warning">
-          Upgrade to Pro
+        <Button
+          variant="contained"
+          size="small"
+          color="warning"
+          component={RouterLink}
+          href="/dashboard/user/account/documents/"
+        >
+          Adjuntar documentos
         </Button>
       </Box>
     </Box>

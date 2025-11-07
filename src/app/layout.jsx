@@ -11,6 +11,8 @@ import { MotionLazy } from 'src/components/animate/motion-lazy';
 import { detectSettings } from 'src/components/settings/server';
 import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/components/settings';
 
+import { CheckoutProvider } from 'src/sections/checkout/context';
+
 import { AuthProvider } from 'src/auth/context/login';
 
 import { Providers } from './providers';
@@ -76,9 +78,9 @@ export default async function RootLayout({ children }) {
                 <MotionLazy>
                   <ProgressBar />
                   <SettingsDrawer defaultSettings={defaultSettings} />
-                    <Providers>
-                      {children}
-                    </Providers>
+                  <CheckoutProvider>
+                    <Providers>{children}</Providers>
+                  </CheckoutProvider>
                 </MotionLazy>
               </ThemeProvider>
             </AppRouterCacheProvider>

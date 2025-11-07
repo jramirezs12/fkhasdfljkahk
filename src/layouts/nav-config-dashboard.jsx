@@ -64,16 +64,30 @@ export const navData = [
   {
     subheader: 'Management',
     items: [
-      {
-        title: 'Group',
-        path: paths.dashboard.group.root,
+       {
+        title: 'Usuario',
+        path: paths.dashboard.user.root,
         icon: ICONS.user,
         children: [
-          { title: 'Four', path: paths.dashboard.group.root },
-          { title: 'Five', path: paths.dashboard.group.five },
-          { title: 'Six', path: paths.dashboard.group.six },
+          { title: 'Profile', path: paths.dashboard.user.root },
+          { title: 'Bodegas', path: paths.dashboard.user.cards },
+          { title: 'List', path: paths.dashboard.user.list },
+          { title: 'Create', path: paths.dashboard.user.new },
+          { title: 'Edit', path: paths.dashboard.user.demo.edit },
+          { title: 'Cuenta', path: paths.dashboard.user.account, deepMatch: true },
         ],
       },
+      {
+        title: 'Product',
+        path: paths.dashboard.product.root,
+        icon: ICONS.product,
+        children: [
+          { title: 'List', path: paths.dashboard.product.root },
+          { title: 'Details', path: paths.dashboard.product.demo.details },
+          { title: 'Create', path: paths.dashboard.product.new },
+          { title: 'Edit', path: paths.dashboard.product.demo.edit },
+        ],
+      }
     ],
   },
 ];

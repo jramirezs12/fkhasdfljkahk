@@ -18,7 +18,7 @@ export function AuthSplitSection({
   layoutQuery = 'md',
   title = 'Manage the job',
   imgUrl = `${CONFIG.assetsDir}/assets/illustrations/illustration-dashboard.webp`,
-  subtitle = 'More effectively with optimized workflows.',
+  subtitle = '',
   ...other
 }) {
   return (
@@ -69,7 +69,7 @@ export function AuthSplitSection({
         sx={{ width: 1, aspectRatio: '4/3', objectFit: 'cover' }}
       />
 
-      {!!methods?.length && method && (
+      {/* {!!methods?.length && method && (
         <Box component="ul" sx={{ gap: 2, display: 'flex' }}>
           {methods.map((option) => {
             const selected = method === option.label.toLowerCase();
@@ -103,7 +103,7 @@ export function AuthSplitSection({
             );
           })}
         </Box>
-      )}
+      )} */}
     </Box>
   );
 }

@@ -80,7 +80,7 @@ export default function LoginView() {
       }
 
       await checkUserSession?.();
-      
+
       router.replace(returnTo);
       router.refresh();
     } catch (error) {
@@ -149,7 +149,7 @@ export default function LoginView() {
           <>
             Si aún no tienes una cuenta
             <Link component={RouterLink} href={paths.auth.jwt.signUp} variant="subtitle2">
-              Regístrate aquí
+              &nbsp;Regístrate aquí
             </Link>
           </>
         }

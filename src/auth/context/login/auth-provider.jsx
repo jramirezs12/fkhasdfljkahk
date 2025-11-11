@@ -1,69 +1,13 @@
 'use client';
 
-import { gql } from 'graphql-request';
 import { useSetState } from 'minimal-shared/hooks';
 import { useMemo, useEffect, useCallback } from 'react';
 
-import graphqlClient from 'src/lib/graphqlClient';
+import { ME_QUERY, requestGql } from 'src/auth/context/login/queries';
 
 import { JWT_STORAGE_KEY } from './constant';
 import { AuthContext } from '../auth-context';
 import { setSession, isValidToken } from './utils';
-
-const ME_QUERY = gql`
-  query Customer {
-    customer {
-      id
-      email
-      firstname
-      lastname
-      allow_remote_shopping_assistance
-      confirmation_status
-      created_at
-      date_of_birth
-      default_billing
-      default_shipping
-      dob
-      gender
-      group_id
-      is_subscribed
-      middlename
-      prefix
-      suffix
-      taxvat
-      addresses {
-        default_shipping
-        country_code
-        country_id
-        city
-        postcode
-        telephone
-        company
-        firstname
-        lastname
-        region {
-          region
-          region_code
-          region_id
-        }
-        street
-        suffix
-      }
-      custom_attributes(attributeCodes: ["tipo_identificacion_usuario", "numero_identificacion_usuario"]) {
-        code
-        ... on AttributeValue {
-          value
-        }
-        ... on AttributeSelectedOptions {
-          selected_options {
-            value
-            label
-          }
-        }
-      }
-    }
-  }
-`;
 
 export function AuthProvider({ children }) {
   const { state, setState } = useSetState({ user: null, loading: true });
@@ -75,7 +19,7 @@ export function AuthProvider({ children }) {
       if (accessToken && isValidToken(accessToken)) {
         await setSession(accessToken);
 
-        const data = await graphqlClient.request(ME_QUERY);
+        const data = await requestGql('Customer:me', ME_QUERY, null);
         const c = data?.customer;
 
         if (c) {
@@ -83,10 +27,8 @@ export function AuthProvider({ children }) {
           const lastName = c.lastname ?? '';
           const displayName = [firstName, lastName].filter(Boolean).join(' ') || c.email;
 
-          // Dirección principal
           const addresses = Array.isArray(c.addresses) ? c.addresses : [];
-          const primaryAddress =
-            addresses.find((a) => a?.default_shipping) ?? addresses[0] ?? null;
+          const primaryAddress = addresses.find((a) => a?.default_shipping) ?? addresses[0] ?? null;
 
           const streetLines = Array.isArray(primaryAddress?.street)
             ? primaryAddress.street.filter(Boolean)
@@ -98,7 +40,6 @@ export function AuthProvider({ children }) {
           const regionCode = regionObj?.region_code ?? null;
           const regionId = regionObj?.region_id ?? null;
 
-          // Custom attributes
           const custom = Array.isArray(c.custom_attributes) ? c.custom_attributes : [];
           const getCustom = (code) => custom.find((a) => a?.code === code);
 
@@ -115,25 +56,14 @@ export function AuthProvider({ children }) {
               firstName,
               lastName,
               displayName,
-              // Campos extra del customer
-              allowRemoteShoppingAssistance: c.allow_remote_shopping_assistance,
               confirmationStatus: c.confirmation_status,
-              createdAt: c.created_at,
-              defaultBilling: c.default_billing,
-              defaultShipping: c.default_shipping,
               gender: c.gender,
-              groupId: c.group_id,
-              isSubscribed: c.is_subscribed,
               middlename: c.middlename,
-              prefix: c.prefix,
-              suffix: c.suffix,
-              taxvat: c.taxvat,
-              // Dirección principal (si aplica)
               address: primaryAddress
                 ? {
                     defaultShipping: !!primaryAddress.default_shipping,
-                    countryCode: primaryAddress.country_code ?? null, // "CO"
-                    countryId: primaryAddress.country_id ?? null, // "CO"
+                    countryCode: primaryAddress.country_code ?? null,
+                    countryId: primaryAddress.country_id ?? null,
                     city: primaryAddress.city ?? null,
                     postcode: primaryAddress.postcode ?? null,
                     telephone: primaryAddress.telephone ?? null,
@@ -145,16 +75,14 @@ export function AuthProvider({ children }) {
                       code: regionCode,
                       id: regionId,
                     },
-                    street, // "CL 147 A # 45 - 91, primer piso"
-                    streetLines, // ['CL 147 A # 45 - 91', 'primer piso']
+                    street,
+                    streetLines,
                     suffix: primaryAddress.suffix ?? null,
                   }
                 : null,
-              // Identificación
-              identificationType, // "Cédula de ciudadanía"
-              identificationTypeValue, // "308"
-              identificationNumber, // "6546463546"
-              // Token
+              identificationType,
+              identificationTypeValue,
+              identificationNumber,
               accessToken,
             },
             loading: false,
@@ -188,5 +116,5 @@ export function AuthProvider({ children }) {
     [checkUserSession, state.user, status]
   );
 
-  return <AuthContext value={memoizedValue}>{children}</AuthContext>;
+  return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
 }

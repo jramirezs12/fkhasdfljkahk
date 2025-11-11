@@ -6,7 +6,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
 import { _userCards } from 'src/_mock';
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 
 import { Iconify } from 'src/components/iconify';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
@@ -17,18 +17,18 @@ import { UserCardList } from '../user-card-list';
 
 export function UserCardsView() {
   return (
-    <DashboardContent>
+    <HomeContent>
       <CustomBreadcrumbs
-        heading="Cards"
+        heading="Bodegas"
         links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
-          { name: 'Cards' },
+          { name: 'Home', href: paths.home.root },
+          { name: 'User', href: paths.home.user.root },
+          { name: 'Bodegas' },
         ]}
         action={
           <Button
             component={RouterLink}
-            href={paths.dashboard.user.new}
+            href={paths.home.user.new}
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >
@@ -39,6 +39,6 @@ export function UserCardsView() {
       />
 
       <UserCardList users={_userCards} />
-    </DashboardContent>
+    </HomeContent>
   );
 }

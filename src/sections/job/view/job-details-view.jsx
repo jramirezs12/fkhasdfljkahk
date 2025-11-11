@@ -8,7 +8,7 @@ import Tabs from '@mui/material/Tabs';
 
 import { paths } from 'src/routes/paths';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 import { JOB_DETAILS_TABS, JOB_PUBLISH_OPTIONS } from 'src/_mock';
 
 import { Label } from 'src/components/label';
@@ -30,8 +30,8 @@ export function JobDetailsView({ job }) {
 
   const renderToolbar = () => (
     <JobDetailsToolbar
-      backHref={paths.dashboard.job.root}
-      editHref={paths.dashboard.job.edit(`${job?.id}`)}
+      backHref={paths.home.job.root}
+      editHref={paths.home.job.edit(`${job?.id}`)}
       liveHref="#"
       publish={publish || ''}
       onChangePublish={handleChangePublish}
@@ -60,12 +60,12 @@ export function JobDetailsView({ job }) {
   );
 
   return (
-    <DashboardContent>
+    <HomeContent>
       {renderToolbar()}
 
       {renderTabs()}
       {tabs.value === 'content' && <JobDetailsContent job={job} />}
       {tabs.value === 'candidates' && <JobDetailsCandidates candidates={job?.candidates ?? []} />}
-    </DashboardContent>
+    </HomeContent>
   );
 }

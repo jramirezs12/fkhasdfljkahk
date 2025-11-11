@@ -9,7 +9,7 @@ import { paths } from 'src/routes/paths';
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 
 import { Iconify } from 'src/components/iconify';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
@@ -20,27 +20,27 @@ const NAV_ITEMS = [
   {
     label: 'General',
     icon: <Iconify width={24} icon="solar:user-id-bold" />,
-    href: paths.dashboard.user.account,
+    href: paths.home.user.account,
   },
   // {
   //   label: 'Billing',
   //   icon: <Iconify width={24} icon="solar:bill-list-bold" />,
-  //   href: `${paths.dashboard.user.account}/billing`,
+  //   href: `${paths.home.user.account}/billing`,
   // },
   // {
   //   label: 'Notifications',
   //   icon: <Iconify width={24} icon="solar:bell-bing-bold" />,
-  //   href: `${paths.dashboard.user.account}/notifications`,
+  //   href: `${paths.home.user.account}/notifications`,
   // },
   {
     label: 'Documentos',
     icon: <Iconify width={24} icon="solar:document-add-bold" />,
-    href: `${paths.dashboard.user.account}/documents`,
+    href: `${paths.home.user.account}/documents`,
   },
   // {
   //   label: 'Security',
   //   icon: <Iconify width={24} icon="ic:round-vpn-key" />,
-  //   href: `${paths.dashboard.user.account}/change-password`,
+  //   href: `${paths.home.user.account}/change-password`,
   // },
 ];
 
@@ -50,12 +50,12 @@ export function AccountLayout({ children, ...other }) {
   const pathname = usePathname();
 
   return (
-    <DashboardContent {...other}>
+    <HomeContent {...other}>
       <CustomBreadcrumbs
         heading="Cuenta"
         links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Usuario', href: paths.dashboard.user.root },
+          { name: 'Home', href: paths.home.root },
+          { name: 'Usuario', href: paths.home.user.root },
           { name: 'Cuenta' },
         ]}
         sx={{ mb: 3 }}
@@ -75,6 +75,6 @@ export function AccountLayout({ children, ...other }) {
       </Tabs>
 
       {children}
-    </DashboardContent>
+    </HomeContent>
   );
 }

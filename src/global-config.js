@@ -17,7 +17,7 @@ export const CONFIG = {
   auth: {
     method: 'login',
     skip: false,
-    redirectPath: paths.dashboard.root,
+    redirectPath: paths.home.root,
   },
   /**
    * Firebase

@@ -188,7 +188,7 @@ export function NotificationItem({ notification }) {
         Design
       </Label>
       <Label variant="outlined" color="warning">
-        Dashboard
+        Home
       </Label>
       <Label variant="outlined">Design system</Label>
     </Box>

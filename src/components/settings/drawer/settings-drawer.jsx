@@ -141,7 +141,7 @@ export function SettingsDrawer({ sx, defaultSettings }) {
 
   const renderCompactLayout = () => (
     <BaseOption
-      tooltip="Dashboard only and available at large resolutions > 1600px (xl)"
+      tooltip="Home only and available at large resolutions > 1600px (xl)"
       label="Compact"
       selected={!!settings.state.compactLayout}
       icon={<SvgIcon>{settingIcons.autofitWidth}</SvgIcon>}
@@ -174,7 +174,7 @@ export function SettingsDrawer({ sx, defaultSettings }) {
   );
 
   const renderNav = () => (
-    <LargeBlock title="Nav" tooltip="Dashboard only" sx={{ gap: 2.5 }}>
+    <LargeBlock title="Nav" tooltip="Home only" sx={{ gap: 2.5 }}>
       {visibility.navLayout && (
         <SmallBlock
           label="Layout"

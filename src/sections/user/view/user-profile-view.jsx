@@ -11,7 +11,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { usePathname, useSearchParams } from 'src/routes/hooks';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 import { _userAbout, _userFeeds, _userFriends, _userGallery, _userFollowers } from 'src/_mock';
 
 import { Iconify } from 'src/components/iconify';
@@ -31,8 +31,16 @@ import { ProfileFollowers } from '../profile-followers';
 const NAV_ITEMS = [
   { value: '', label: 'Perfil', icon: <Iconify width={24} icon="solar:user-id-bold" /> },
   { value: 'followers', label: 'Followers', icon: <Iconify width={24} icon="solar:heart-bold" /> },
-  { value: 'friends', label: 'Bodegas', icon: <Iconify width={24} icon="solar:users-group-rounded-bold" /> },
-  { value: 'documents', label: 'Documentos', icon: <Iconify width={24} icon="solar:document-add-bold" /> },
+  {
+    value: 'friends',
+    label: 'Bodegas',
+    icon: <Iconify width={24} icon="solar:users-group-rounded-bold" />,
+  },
+  {
+    value: 'documents',
+    label: 'Documentos',
+    icon: <Iconify width={24} icon="solar:document-add-bold" />,
+  },
 ];
 
 // ----------------------------------------------------------------------
@@ -69,12 +77,12 @@ export function UserProfileView() {
   };
 
   return (
-    <DashboardContent>
+    <HomeContent>
       <CustomBreadcrumbs
         heading="Perfil"
         links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Usuario', href: paths.dashboard.user?.root ?? paths.dashboard.root },
+          { name: 'Home', href: paths.home.root },
+          { name: 'Usuario', href: paths.home.user?.root ?? paths.home.root },
           { name: displayName },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -128,6 +136,6 @@ export function UserProfileView() {
       )}
 
       {selectedTab === 'documents' && <ProfileDocuments documents={_userGallery} />}
-    </DashboardContent>
+    </HomeContent>
   );
 }

@@ -13,8 +13,8 @@ import Typography from '@mui/material/Typography';
 
 import { paths } from 'src/routes/paths';
 
+import { HomeContent } from 'src/layouts/home';
 import { PRODUCT_PUBLISH_OPTIONS } from 'src/_mock';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -62,11 +62,11 @@ export function ProductDetailsView({ product }) {
   }, []);
 
   return (
-    <DashboardContent>
+    <HomeContent>
       <ProductDetailsToolbar
-        backHref={paths.dashboard.product.root}
+        backHref={paths.home.product.root}
         liveHref={paths.product.details(`${product?.id}`)}
-        editHref={paths.dashboard.product.edit(`${product?.id}`)}
+        editHref={paths.home.product.edit(`${product?.id}`)}
         publish={publish}
         onChangePublish={handleChangePublish}
         publishOptions={PRODUCT_PUBLISH_OPTIONS}
@@ -137,6 +137,6 @@ export function ProductDetailsView({ product }) {
           />
         )}
       </Card>
-    </DashboardContent>
+    </HomeContent>
   );
 }

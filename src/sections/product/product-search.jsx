@@ -3,7 +3,7 @@
 import parse from 'autosuggest-highlight/parse';
 import match from 'autosuggest-highlight/match';
 import { useDebounce } from 'minimal-shared/hooks';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -15,7 +15,7 @@ import Autocomplete, { autocompleteClasses } from '@mui/material/Autocomplete';
 import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
-import { useGetProducts } from 'src/actions/product';
+import { useGetProducts } from 'src/actions/product/product';
 
 import { Iconify } from 'src/components/iconify';
 import { SearchNotFound } from 'src/components/search-not-found';
@@ -133,7 +133,7 @@ function useSearchData(searchQuery, products) {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const dataset = useMemo(() => Array.isArray(products) ? products : [], [products]);
+  const dataset = useMemo(() => (Array.isArray(products) ? products : []), [products]);
 
   const fetchSearchResults = useCallback(async () => {
     setLoading(true);

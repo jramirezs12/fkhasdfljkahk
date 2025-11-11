@@ -40,10 +40,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
   const email = user?.email || '';
 
   const displayName =
-    user?.displayName ||
-    [firstName, lastName].filter(Boolean).join(' ') ||
-    email ||
-    'Usuario';
+    user?.displayName || [firstName, lastName].filter(Boolean).join(' ') || email || 'Usuario';
 
   const initials = (() => {
     if (firstName || lastName) {
@@ -51,7 +48,10 @@ export function AccountDrawer({ data = [], sx, ...other }) {
     }
     if (user?.displayName) {
       const parts = user.displayName.trim().split(/\s+/);
-      return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || (email?.[0] ?? 'U').toUpperCase();
+      return (
+        `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() ||
+        (email?.[0] ?? 'U').toUpperCase()
+      );
     }
     return (email?.[0] ?? 'U').toUpperCase();
   })();
@@ -83,8 +83,8 @@ export function AccountDrawer({ data = [], sx, ...other }) {
       ]}
     >
       {data.map((option) => {
-        const rootLabel = pathname.includes('/dashboard') ? 'Home' : 'Dashboard';
-        const rootHref = pathname.includes('/dashboard') ? '/' : paths.dashboard.root;
+        const rootLabel = pathname.includes('/home') ? 'Home' : 'Home';
+        const rootHref = pathname.includes('/home') ? '/' : paths.home.root;
 
         return (
           <MenuItem key={option.label}>

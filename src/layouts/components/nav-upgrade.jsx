@@ -56,7 +56,7 @@ export function NavUpgrade({ sx, ...other }) {
             {user?.displayName}
           </Typography>
 
-        <Typography
+          <Typography
             variant="body2"
             noWrap
             sx={{ color: 'var(--layout-nav-text-disabled-color)' }}
@@ -162,7 +162,7 @@ export function UpgradeBlock({ sx, ...other }) {
           size="small"
           color="warning"
           component={RouterLink}
-          href="/dashboard/user/account/documents/"
+          href="/home/user/account/documents/"
         >
           Adjuntar documentos
         </Button>

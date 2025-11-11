@@ -11,7 +11,7 @@ import Button from '@mui/material/Button';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 import {
   _jobs,
   _roles,
@@ -76,7 +76,7 @@ export function JobListView() {
         alignItems: { xs: 'flex-end', sm: 'center' },
       }}
     >
-      <JobSearch redirectPath={(id) => paths.dashboard.job.details(id)} />
+      <JobSearch redirectPath={(id) => paths.home.job.details(id)} />
 
       <Box sx={{ gap: 1, flexShrink: 0, display: 'flex' }}>
         <JobFilters
@@ -103,18 +103,18 @@ export function JobListView() {
   );
 
   return (
-    <DashboardContent>
+    <HomeContent>
       <CustomBreadcrumbs
         heading="List"
         links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Job', href: paths.dashboard.job.root },
+          { name: 'Home', href: paths.home.root },
+          { name: 'Job', href: paths.home.job.root },
           { name: 'List' },
         ]}
         action={
           <Button
             component={RouterLink}
-            href={paths.dashboard.job.new}
+            href={paths.home.job.new}
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >
@@ -132,7 +132,7 @@ export function JobListView() {
       {notFound && <EmptyContent filled sx={{ py: 10 }} />}
 
       <JobList jobs={dataFiltered} />
-    </DashboardContent>
+    </HomeContent>
   );
 }
 

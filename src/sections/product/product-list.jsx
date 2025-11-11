@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 
@@ -10,10 +10,10 @@ import { ProductItem } from './product-item';
 import { ProductItemSkeleton } from './product-skeleton';
 
 // Ajustes de scroll para rapidez sin encadenar
-const MIN_INTERVAL_MS = 200;     // intervalo mínimo entre cargas
-const SCROLL_DELTA_PX = 200;     // desplazamiento mínimo adicional antes de permitir otra carga
+const MIN_INTERVAL_MS = 200; // intervalo mínimo entre cargas
+const SCROLL_DELTA_PX = 200; // desplazamiento mínimo adicional antes de permitir otra carga
 const ROOT_MARGIN = '600px 0px'; // pre-dispara ~600px antes del final
-const THRESHOLD = 0;             // dispara en cuanto entra al margen
+const THRESHOLD = 0; // dispara en cuanto entra al margen
 
 export function ProductList({
   products = [],
@@ -95,7 +95,7 @@ export function ProductList({
               xs: 'repeat(1, 1fr)',
               sm: 'repeat(2, 1fr)',
               md: 'repeat(3, 1fr)',
-              lg: 'repeat(6, 1fr)',
+              lg: 'repeat(5, 1fr)',
             },
           },
           ...(Array.isArray(sx) ? sx : [sx]),
@@ -105,11 +105,7 @@ export function ProductList({
         {loading && products.length === 0
           ? renderInitialLoading()
           : products.map((p) => (
-              <ProductItem
-                key={p.id}
-                product={p}
-                detailsHref={paths.dashboard.product.details(p.id)}
-              />
+              <ProductItem key={p.id} product={p} detailsHref={paths.home.product.details(p.id)} />
             ))}
 
         {!loading && loadingMore && renderMoreLoading()}

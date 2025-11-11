@@ -1,23 +1,12 @@
 'use client';
 
-import { gql } from 'graphql-request';
-
-import graphqlClient from 'src/lib/graphqlClient';
-
 import { setSession } from './utils';
-
-const LOGIN_MUTATION = gql`
-  mutation GenerateCustomerToken($email: String!, $password: String!) {
-    generateCustomerToken(email: $email, password: $password) {
-      token
-    }
-  }
-`;
+import { requestGql, LOGIN_MUTATION } from './queries';
 
 export const signInWithPassword = async ({ email, password }) => {
-  const data = await graphqlClient.request(LOGIN_MUTATION, { email, password });
+  const data = await requestGql('GenerateCustomerToken', LOGIN_MUTATION, { email, password });
   const token = data?.generateCustomerToken?.token;
-  if (!token) throw new Error('Token not found in GraphQL response');
+  if (!token) throw new Error('Usuario o contraseña no válidos.');
   await setSession(token);
   return token;
 };

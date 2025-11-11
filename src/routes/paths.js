@@ -2,14 +2,14 @@
 
 const ROOTS = {
   AUTH: '/auth',
-  DASHBOARD: '/dashboard',
+  HOME: '/home',
 };
 
 // ----------------------------------------------------------------------
 
 export const paths = {
   faqs: '/faqs',
-  minimalStore: 'https://mui.com/store/items/minimal-dashboard/',
+  minimalStore: 'https://mui.com/store/items/minimal-home/',
   // AUTH
   auth: {
     amplify: {
@@ -41,29 +41,29 @@ export const paths = {
     },
     login: `${ROOTS.AUTH}/login`,
   },
-  // DASHBOARD
-  dashboard: {
-    root: ROOTS.DASHBOARD,
-    two: `${ROOTS.DASHBOARD}/two`,
-    three: `${ROOTS.DASHBOARD}/three`,
+  // HOME
+  home: {
+    root: ROOTS.HOME,
+    two: `${ROOTS.HOME}/two`,
+    three: `${ROOTS.HOME}/three`,
     user: {
-      root: `${ROOTS.DASHBOARD}/user`,
-      new: `${ROOTS.DASHBOARD}/user/new`,
-      list: `${ROOTS.DASHBOARD}/user/list`,
-      cards: `${ROOTS.DASHBOARD}/user/cards`,
-      profile: `${ROOTS.DASHBOARD}/user/profile`,
-      account: `${ROOTS.DASHBOARD}/user/account`,
-      edit: (id) => `${ROOTS.DASHBOARD}/user/${id}/edit`,
-      demo: { edit: `${ROOTS.DASHBOARD}/user/edit` }, // TODO: Corregir al id antes del edit
+      root: `${ROOTS.HOME}/user`,
+      new: `${ROOTS.HOME}/user/new`,
+      list: `${ROOTS.HOME}/user/list`,
+      cards: `${ROOTS.HOME}/user/cards`,
+      profile: `${ROOTS.HOME}/user/profile`,
+      account: `${ROOTS.HOME}/user/account`,
+      edit: (id) => `${ROOTS.HOME}/user/${id}/edit`,
+      demo: { edit: `${ROOTS.HOME}/user/edit` }, // TODO: Corregir al id antes del edit
     },
     product: {
-      root: `${ROOTS.DASHBOARD}/product`,
-      new: `${ROOTS.DASHBOARD}/product/new`,  
-      details: (id) => `${ROOTS.DASHBOARD}/product/${id}`,
-      edit: (id) => `${ROOTS.DASHBOARD}/product/${id}/edit`,
+      root: `${ROOTS.HOME}/product`,
+      new: `${ROOTS.HOME}/product/new`,
+      details: (id) => `${ROOTS.HOME}/product/${id}`,
+      edit: (id) => `${ROOTS.HOME}/product/${id}/edit`,
       demo: {
-        details: `${ROOTS.DASHBOARD}/product/`, // TODO: Corregir al id antes del edit
-        edit: `${ROOTS.DASHBOARD}/product/edit`, // TODO: Corregir al id antes del edit
+        details: `${ROOTS.HOME}/product/`, // TODO: Corregir al id antes del edit
+        edit: `${ROOTS.HOME}/product/edit`, // TODO: Corregir al id antes del edit
       },
     },
   },

@@ -2,7 +2,7 @@
 
 import { paths } from 'src/routes/paths';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
@@ -12,18 +12,18 @@ import { UserCreateEditForm } from '../user-create-edit-form';
 
 export function UserCreateView() {
   return (
-    <DashboardContent>
+    <HomeContent>
       <CustomBreadcrumbs
         heading="Create a new user"
         links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
+          { name: 'Home', href: paths.home.root },
+          { name: 'User', href: paths.home.user.root },
           { name: 'Create' },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
       <UserCreateEditForm />
-    </DashboardContent>
+    </HomeContent>
   );
 }

@@ -101,7 +101,7 @@ export function JobCreateEditForm({ currentJob }) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
       toast.success(currentJob ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.job.root);
+      router.push(paths.home.job.root);
       console.info('DATA', data);
     } catch (error) {
       console.error(error);

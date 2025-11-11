@@ -27,8 +27,8 @@ export function JobList({ jobs }) {
           <JobItem
             key={job.id}
             job={job}
-            editHref={paths.dashboard.job.edit(job.id)}
-            detailsHref={paths.dashboard.job.details(job.id)}
+            editHref={paths.home.job.edit(job.id)}
+            detailsHref={paths.home.job.details(job.id)}
             onDelete={() => handleDelete(job.id)}
           />
         ))}

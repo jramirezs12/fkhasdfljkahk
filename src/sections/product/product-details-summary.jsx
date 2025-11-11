@@ -76,7 +76,7 @@ export function ProductDetailsSummary({ items, product, onAddToCart, disableActi
       if (!existProduct) {
         onAddToCart?.({ ...data, colors: [values.colors] });
       }
-      router.push(paths.dashboard.product.checkout);
+      router.push(paths.home.product.checkout);
     } catch (error) {
       console.error(error);
     }

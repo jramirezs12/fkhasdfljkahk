@@ -2,7 +2,7 @@
 
 import { paths } from 'src/routes/paths';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
@@ -12,19 +12,19 @@ import { ProductCreateEditForm } from '../product-create-edit-form';
 
 export function ProductEditView({ product }) {
   return (
-    <DashboardContent>
+    <HomeContent>
       <CustomBreadcrumbs
         heading="Edit"
-        backHref={paths.dashboard.product.root}
+        backHref={paths.home.product.root}
         links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Product', href: paths.dashboard.product.root },
+          { name: 'Home', href: paths.home.root },
+          { name: 'Product', href: paths.home.product.root },
           { name: product?.name },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
       <ProductCreateEditForm currentProduct={product} />
-    </DashboardContent>
+    </HomeContent>
   );
 }

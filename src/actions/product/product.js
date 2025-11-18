@@ -31,12 +31,12 @@
  */
 
 import useSWR from 'swr';
-import { gql } from 'graphql-request';
 import { useMemo, useCallback } from 'react';
 import { useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 
 import graphqlClient from 'src/lib/graphqlClient';
-import { endpoints, fetcher as axiosFetcher } from 'src/lib/axios';
+
+import { PRODUCT_LIST } from './queries';
 
 // ------------------------------------------------------------------
 // Opciones base de SWR (para los otros hooks)
@@ -46,32 +46,6 @@ const swrOptions = {
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
 };
-
-// ------------------------------------------------------------------
-// Query GraphQL
-// ------------------------------------------------------------------
-const PRODUCT_LIST = gql`
-  query productListAux($currentPage: Int!, $pageSize: Int!, $filter: ProductAttributeFilterInput!) {
-    products(currentPage: $currentPage, pageSize: $pageSize, filter: $filter) {
-      page_info { total_pages }
-      items {
-        name
-        sku
-        uid
-        image { url }
-        stock_saleable
-        categories { name uid }
-        price_range {
-          minimum_price {
-            regular_price { value }
-            final_price { value }
-          }
-        }
-      }
-      total_count
-    }
-  }
-`;
 
 // ------------------------------------------------------------------
 // Helpers

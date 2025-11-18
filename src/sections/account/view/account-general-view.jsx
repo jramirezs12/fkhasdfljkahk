@@ -1,6 +1,6 @@
 'use client';
 
-import { AccountGeneral } from '../account-general';
+import { AccountGeneral } from '../components/account-general';
 
 // ----------------------------------------------------------------------
 

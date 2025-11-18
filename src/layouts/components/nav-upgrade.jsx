@@ -1,3 +1,5 @@
+'use client';
+
 import { m } from 'framer-motion';
 import { varAlpha } from 'minimal-shared/utils';
 
@@ -7,18 +9,32 @@ import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 
 import { paths } from 'src/routes/paths';
+import { RouterLink } from 'src/routes/components';
 
 import { CONFIG } from 'src/global-config';
 
 import { Label } from 'src/components/label';
 
 import { useMockedUser } from 'src/auth/hooks';
-import { RouterLink } from 'src/routes/components';
+// Preferimos el hook real de autenticación; fallback al mocked user para desarrollo
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
 export function NavUpgrade({ sx, ...other }) {
-  const { user } = useMockedUser();
+  const auth = useAuthContext();
+  const storeUser = auth?.user ?? null;
+
+  // Fallback a mocked user sólo si no existe usuario real
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const mocked = useMockedUser ? useMockedUser() : null;
+  const mockedUser = mocked?.user ?? null;
+
+  const user = storeUser ?? mockedUser ?? null;
+
+  const displayName = user?.displayName || user?.name || user?.firstName || 'Usuario';
+  const email = user?.email ?? '';
+  const photoURL = user?.photoURL ?? '';
 
   return (
     <Box
@@ -27,24 +43,10 @@ export function NavUpgrade({ sx, ...other }) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
         <Box sx={{ position: 'relative' }}>
-          <Avatar src={user?.photoURL} alt={user?.displayName} sx={{ width: 48, height: 48 }}>
-            {user?.displayName?.charAt(0).toUpperCase()}
+          <Avatar src={photoURL} alt={displayName} sx={{ width: 48, height: 48 }}>
+            {displayName?.charAt(0)?.toUpperCase() ?? 'U'}
           </Avatar>
 
-          <Label
-            color="success"
-            variant="filled"
-            sx={{
-              top: -6,
-              px: 0.5,
-              left: 40,
-              height: 20,
-              position: 'absolute',
-              borderBottomLeftRadius: 2,
-            }}
-          >
-            Free
-          </Label>
         </Box>
 
         <Box sx={{ mb: 2, mt: 1.5, width: 1 }}>
@@ -53,7 +55,7 @@ export function NavUpgrade({ sx, ...other }) {
             noWrap
             sx={{ mb: 1, color: 'var(--layout-nav-text-primary-color)' }}
           >
-            {user?.displayName}
+            {displayName}
           </Typography>
 
           <Typography
@@ -61,18 +63,9 @@ export function NavUpgrade({ sx, ...other }) {
             noWrap
             sx={{ color: 'var(--layout-nav-text-disabled-color)' }}
           >
-            {user?.email}
+            {email}
           </Typography>
         </Box>
-
-        <Button
-          variant="contained"
-          href={paths.minimalStore}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Upgrade to Pro
-        </Button>
       </Box>
     </Box>
   );
@@ -111,27 +104,6 @@ export function UpgradeBlock({ sx, ...other }) {
           border: `solid 3px ${varAlpha(theme.vars.palette.common.whiteChannel, 0.16)}`,
         })}
       />
-
-      {/*
-      <Box
-        component={m.img}
-        animate={{ y: [12, -12, 12] }}
-        transition={{
-          duration: 8,
-          ease: 'linear',
-          repeat: Infinity,
-          repeatDelay: 0,
-        }}
-        alt="Small Rocket"
-        src={`${CONFIG.assetsDir}/assets/illustrations/illustration-rocket-small.webp`}
-        sx={{
-          right: 0,
-          width: 112,
-          height: 112,
-          position: 'absolute',
-        }}
-      />
-      */}
 
       <Box
         sx={{

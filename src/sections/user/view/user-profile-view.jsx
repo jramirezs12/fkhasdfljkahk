@@ -20,11 +20,11 @@ import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 // Usa el usuario real del contexto (no el mock)
 import { useAuthContext } from 'src/auth/hooks';
 
-import { ProfileHome } from '../profile-home';
-import { ProfileCover } from '../profile-cover';
-import { ProfileFriends } from '../profile-friends';
-import { ProfileDocuments } from '../profile-documents';
-import { ProfileFollowers } from '../profile-followers';
+import { ProfileHome } from '../components/profile-home';
+import { ProfileCover } from '../components/profile-cover';
+import { ProfileFriends } from '../components/profile-friends';
+import { ProfileDocuments } from '../components/profile-documents';
+import { ProfileFollowers } from '../components/profile-followers';
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ const NAV_ITEMS = [
   { value: 'followers', label: 'Followers', icon: <Iconify width={24} icon="solar:heart-bold" /> },
   {
     value: 'friends',
-    label: 'Bodegas',
+    label: 'Amigos',
     icon: <Iconify width={24} icon="solar:users-group-rounded-bold" />,
   },
   {
@@ -81,7 +81,7 @@ export function UserProfileView() {
       <CustomBreadcrumbs
         heading="Perfil"
         links={[
-          { name: 'Home', href: paths.home.root },
+          { name: 'Inicio', href: paths.home.root },
           { name: 'Usuario', href: paths.home.user?.root ?? paths.home.root },
           { name: displayName },
         ]}

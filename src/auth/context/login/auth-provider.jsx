@@ -3,18 +3,19 @@
 import { useSetState } from 'minimal-shared/hooks';
 import { useMemo, useEffect, useCallback } from 'react';
 
-import { ME_QUERY, requestGql } from 'src/auth/context/login/queries';
+import { ME_QUERY } from 'src/auth/context/login/queries';
 
-import { JWT_STORAGE_KEY } from './constant';
+import { STORAGE_KEY } from './constant';
 import { AuthContext } from '../auth-context';
 import { setSession, isValidToken } from './utils';
+import { requestGql } from 'src/lib/graphqlRequest';
 
 export function AuthProvider({ children }) {
   const { state, setState } = useSetState({ user: null, loading: true });
 
   const checkUserSession = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(JWT_STORAGE_KEY);
+      const accessToken = sessionStorage.getItem(STORAGE_KEY);
 
       if (accessToken && isValidToken(accessToken)) {
         await setSession(accessToken);

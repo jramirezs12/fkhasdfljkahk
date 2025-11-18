@@ -1,9 +1,9 @@
 import axios from 'src/lib/axios';
 import { applyGraphqlAuth } from 'src/lib/graphqlClient';
 
-import { JWT_STORAGE_KEY } from './constant';
+import { STORAGE_KEY } from './constant';
 
-export function jwtDecode(token) {
+export function loginDecode(token) {
   const parts = token?.split('.') || [];
   if (parts.length < 2) throw new Error('Invalid token!');
   const base64Url = parts[1];
@@ -14,7 +14,7 @@ export function jwtDecode(token) {
 export function isValidToken(accessToken) {
   if (!accessToken) return false;
   try {
-    const decoded = jwtDecode(accessToken);
+    const decoded = loginDecode(accessToken);
     if (!decoded?.exp) return true;
     return decoded.exp > Date.now() / 1000;
   } catch {
@@ -26,7 +26,7 @@ export function tokenExpired(exp) {
   const ms = Math.max(0, exp * 1000 - Date.now());
   setTimeout(() => {
     try {
-      sessionStorage.removeItem(JWT_STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
       delete axios.defaults.headers.common.Authorization;
       applyGraphqlAuth(null);
     } catch (err) {
@@ -37,17 +37,17 @@ export function tokenExpired(exp) {
 
 export async function setSession(accessToken) {
   if (accessToken) {
-    sessionStorage.setItem(JWT_STORAGE_KEY, accessToken);
+    sessionStorage.setItem(STORAGE_KEY, accessToken);
     axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
     applyGraphqlAuth(accessToken);
     try {
-      const decoded = jwtDecode(accessToken);
+      const decoded = loginDecode(accessToken);
       if (decoded?.exp) tokenExpired(decoded.exp);
     } catch {
-      // No-JWT: sin expiración programada
+      // sin expiración programada
     }
   } else {
-    sessionStorage.removeItem(JWT_STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
     delete axios.defaults.headers.common.Authorization;
     applyGraphqlAuth(null);
   }

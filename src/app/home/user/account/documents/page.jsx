@@ -5,7 +5,7 @@ import { AccountDocumentsView } from 'src/sections/account/view';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: `Account documents settings | Home - ${CONFIG.appName}`,
+  title: `Documentos de la cuenta | Inicio - ${CONFIG.appName}`,
 };
 
 export default function Page() {

@@ -2,9 +2,10 @@
 
 import useSWR from 'swr';
 import { useMemo } from 'react';
-import { gql } from 'graphql-request';
 
 import graphqlClient from 'src/lib/graphqlClient';
+
+import { GET_CATEGORIES_QUERY } from './queries';
 
 const swrOptions = {
   revalidateIfStale: false,
@@ -12,29 +13,11 @@ const swrOptions = {
   revalidateOnReconnect: false,
 };
 
-// Usa exactamente la operación que funciona en Postman (una sola operación en el documento)
-const CATEGORIES_QUERY = gql`
-  query Categories {
-    categories {
-      items {
-        uid
-        id
-        name
-        children {
-          uid
-          id
-          name
-        }
-      }
-    }
-  }
-`;
-
 export function useGetCategories() {
   const { data, isLoading, error, isValidating } = useSWR(
     ['graphql:categories'],
     async () => {
-      const res = await graphqlClient.request(CATEGORIES_QUERY);
+      const res = await graphqlClient.request(GET_CATEGORIES_QUERY);
       return res?.categories ?? null;
     },
     { ...swrOptions }

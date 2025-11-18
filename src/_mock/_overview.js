@@ -35,7 +35,7 @@ export const _appInstalled = ['Germany', 'England', 'France', 'Korean', 'USA'].m
   })
 );
 
-export const _appAuthors = Array.from({ length: 3 }, (_, index) => ({
+export const _appAuthors = Array.from({ length: 6 }, (_, index) => ({
   id: _mock.id(index),
   name: _mock.fullName(index),
   avatarUrl: _mock.image.avatar(index),
@@ -43,9 +43,9 @@ export const _appAuthors = Array.from({ length: 3 }, (_, index) => ({
 }));
 
 export const _appInvoices = Array.from({ length: 5 }, (_, index) => {
-  const category = ['Android', 'Mac', 'Windows', 'Android', 'Mac'][index];
+  const category = ['Tecnologia', 'Moda', 'Electrodomésticos', 'Tecnologia', 'Moda'][index];
 
-  const status = ['paid', 'out of date', 'progress', 'paid', 'paid'][index];
+  const status = ['entregado', 'fuera de fecha', 'en progreso', 'entregado', 'entregado'][index];
 
   return {
     id: _mock.id(index),
@@ -266,7 +266,7 @@ export const _bankingRecentTransitions = [
 // ----------------------------------------------------------------------
 
 export const _bookings = Array.from({ length: 5 }, (_, index) => {
-  const status = ['Paid', 'Paid', 'Pending', 'Cancelled', 'Paid'][index];
+  const status = ['Entregado', 'Entregado', 'Pendiente', 'Cancelado', 'Entregado'][index];
 
   const customer = {
     avatarUrl: _mock.image.avatar(index),

@@ -44,7 +44,7 @@ function CheckoutContainer({ children }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const activeStep = pathname.includes(paths.home.product.checkout)
+  const activeStep = pathname.includes(paths.product.checkout)
     ? Number(searchParams.get('step') ?? 0)
     : null;
 

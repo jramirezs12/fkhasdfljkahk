@@ -2,7 +2,7 @@
 
 import { HomeContent } from 'src/layouts/home';
 
-import { ProductDetailsSkeleton } from 'src/sections/product/product-skeleton';
+import { ProductDetailsSkeleton } from 'src/sections/product/components/product-skeleton';
 
 // ----------------------------------------------------------------------
 

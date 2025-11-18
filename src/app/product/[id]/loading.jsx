@@ -2,7 +2,7 @@
 
 import Container from '@mui/material/Container';
 
-import { ProductDetailsSkeleton } from 'src/sections/product/product-skeleton';
+import { ProductDetailsSkeleton } from 'src/sections/product/components/product-skeleton';
 
 // ----------------------------------------------------------------------
 

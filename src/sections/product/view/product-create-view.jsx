@@ -6,7 +6,7 @@ import { HomeContent } from 'src/layouts/home';
 
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { ProductCreateEditForm } from '../product-create-edit-form';
+import { ProductCreateForm } from '../components/product-create-form';
 
 // ----------------------------------------------------------------------
 
@@ -14,16 +14,16 @@ export function ProductCreateView() {
   return (
     <HomeContent>
       <CustomBreadcrumbs
-        heading="Create a new product"
+        heading="Creación de producto"
         links={[
-          { name: 'Home', href: paths.home.root },
-          { name: 'Product', href: paths.home.product.root },
-          { name: 'Create' },
+          { name: 'Inicio', href: paths.home.root },
+          { name: 'Mis productos', href: paths.home.product.root },
+          { name: 'Crear producto' },
         ]}
-        sx={{ mb: { xs: 3, md: 5 } }}
+        sx={{ mb: { xs: 3, md: 4 } }}
       />
 
-      <ProductCreateEditForm />
+      <ProductCreateForm />
     </HomeContent>
   );
 }

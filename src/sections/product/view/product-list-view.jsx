@@ -20,11 +20,11 @@ import { Iconify } from 'src/components/iconify';
 import { EmptyContent } from 'src/components/empty-content';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { ProductList } from '../product-list';
-import { ProductSort } from '../product-sort';
-import { ProductSearch } from '../product-search';
-import { ProductFilters } from '../product-filters';
-import { ProductTableFiltersResult as ProductFiltersResult } from '../product-table-filters-result';
+import { ProductList } from '../components/product-list';
+import { ProductSort } from '../components/product-sort';
+import { ProductSearch } from '../components/product-search';
+import { ProductFilters } from '../components/product-filters';
+import { ProductTableFiltersResult as ProductFiltersResult } from '../components/product-table-filters-result';
 
 const PUBLISH_OPTIONS = [
   { value: 'published', label: 'Published' },
@@ -97,16 +97,16 @@ export function ProductListView() {
   return (
     <HomeContent>
       <CustomBreadcrumbs
-        heading="List"
+        heading="Lista"
         links={[
-          { name: 'Home', href: paths.home.root },
-          { name: 'Product', href: paths.home.product.root },
-          { name: 'List' },
+          { name: 'Inicio', href: paths.home.root },
+          { name: 'Mis Productos', href: paths.home.product.root },
+          { name: 'Lista' },
         ]}
         action={
           <Button
             component={RouterLink}
-            href={paths.home.product.new}
+            href={paths.home.product.create}
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >

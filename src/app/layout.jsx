@@ -6,6 +6,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { CONFIG } from 'src/global-config';
 import { themeConfig, ThemeProvider, primary as primaryColor } from 'src/theme';
 
+import { Snackbar } from 'src/components/snackbar';
 import { ProgressBar } from 'src/components/progress-bar';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
 import { detectSettings } from 'src/components/settings/server';
@@ -79,6 +80,7 @@ export default async function RootLayout({ children }) {
                   <ProgressBar />
                   <SettingsDrawer defaultSettings={defaultSettings} />
                   <CheckoutProvider>
+                    <Snackbar />
                     <Providers>{children}</Providers>
                   </CheckoutProvider>
                 </MotionLazy>

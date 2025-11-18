@@ -16,12 +16,12 @@ import { paths } from 'src/routes/paths';
 import { Iconify } from 'src/components/iconify';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { CartIcon } from '../cart-icon';
+import { CartIcon } from '../components/cart-icon';
 import { useCheckoutContext } from '../../checkout/context';
-import { ProductDetailsReview } from '../product-details-review';
-import { ProductDetailsSummary } from '../product-details-summary';
-import { ProductDetailsCarousel } from '../product-details-carousel';
-import { ProductDetailsDescription } from '../product-details-description';
+import { ProductDetailsReview } from '../components/product-details-review';
+import { ProductDetailsSummary } from '../components/product-details-summary';
+import { ProductDetailsCarousel } from '../components/product-details-carousel';
+import { ProductDetailsDescription } from '../components/product-details-description';
 
 // ----------------------------------------------------------------------
 
@@ -75,7 +75,6 @@ export function ProductShopDetailsView({ product }) {
                 product={product}
                 items={checkoutState.items}
                 onAddToCart={onAddToCart}
-                disableActions={!product?.available}
               />
             )}
           </Grid>

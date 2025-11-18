@@ -21,13 +21,13 @@ import {
 
 import { EmptyContent } from 'src/components/empty-content';
 
-import { CartIcon } from '../cart-icon';
-import { ProductList } from '../product-list';
-import { ProductSort } from '../product-sort';
-import { ProductSearch } from '../product-search';
+import { CartIcon } from '../components/cart-icon';
+import { ProductList } from '../components/product-list';
+import { ProductSort } from '../components/product-sort';
+import { ProductSearch } from '../components/product-search';
 import { useCheckoutContext } from '../../checkout/context';
-import { ProductFiltersDrawer } from '../product-filters-drawer';
-import { ProductFiltersResult } from '../product-filters-result';
+import { ProductFiltersDrawer } from '../components/product-filters-drawer';
+import { ProductFiltersResult } from '../components/product-filters-result';
 
 // ----------------------------------------------------------------------
 

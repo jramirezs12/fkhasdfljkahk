@@ -4,12 +4,12 @@ import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
-import { CheckoutCart } from '../checkout-cart';
 import { useCheckoutContext } from '../context';
-import { CheckoutSteps } from '../checkout-steps';
-import { CheckoutPayment } from '../checkout-payment';
-import { CheckoutOrderComplete } from '../checkout-order-complete';
-import { CheckoutBillingAddress } from '../checkout-billing-address';
+import { CheckoutCart } from '../components/checkout-cart';
+import { CheckoutSteps } from '../components/checkout-steps';
+import { CheckoutPayment } from '../components/checkout-payment';
+import { CheckoutOrderComplete } from '../components/checkout-order-complete';
+import { CheckoutBillingAddress } from '../components/checkout-billing-address';
 
 // ----------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ export function CheckoutView() {
         {activeStep === 2 && <CheckoutPayment />}
 
         {completed && (
-          <CheckoutOrderComplete open onResetCart={onResetCart} onDownloadPDF={() => {}} />
+          <CheckoutOrderComplete open onResetCart={onResetCart} onDownloadPDF={() => { }} />
         )}
       </>
     </Container>

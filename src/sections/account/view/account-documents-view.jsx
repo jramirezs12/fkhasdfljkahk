@@ -1,6 +1,6 @@
 'use client';
 
-import { AccountDocuments } from '../account-documents';
+import { AccountDocuments } from '../components/account-documents';
 
 // ----------------------------------------------------------------------
 

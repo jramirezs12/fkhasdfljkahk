@@ -38,9 +38,9 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import { UserTableRow } from '../user-table-row';
-import { UserTableToolbar } from '../user-table-toolbar';
-import { UserTableFiltersResult } from '../user-table-filters-result';
+import { UserTableRow } from '../components/user-table-row';
+import { UserTableToolbar } from '../components/user-table-toolbar';
+import { UserTableFiltersResult } from '../components/user-table-filters-result';
 
 // ----------------------------------------------------------------------
 

@@ -2,8 +2,6 @@
 
 import { gql } from 'graphql-request';
 
-import graphqlClient from 'src/lib/graphqlClient';
-
 // ---------------------- Auth (email/password) ----------------------
 export const LOGIN_MUTATION = gql`
   mutation GenerateCustomerToken($email: String!, $password: String!) {
@@ -90,22 +88,3 @@ export const ME_QUERY = gql`
     }
   }
 `;
-
-// ---------------------- Request wrapper con logs ----------------------
-export async function requestGql(name, doc, variables) {
-  try {
-    console.debug('[GQL:request]', name, {
-      query: (doc && doc.loc && doc.loc.source && doc.loc.source.body) || '[gql doc]',
-      variables,
-    });
-    const res = await graphqlClient.request(doc, variables);
-    console.debug('[GQL:response]', name, res);
-    return res;
-  } catch (err) {
-    console.debug('[GQL:error]', name, {
-      message: String(err?.message || err),
-      response: err?.response,
-    });
-    throw err;
-  }
-}

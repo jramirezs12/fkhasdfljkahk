@@ -7,9 +7,10 @@ import axios from 'src/lib/axios';
 import { useAuthStore } from 'src/store/authStore';
 import { useLoginPhoneStore } from 'src/store/loginPhoneStore';
 
-import { setSession } from '../jwt/utils';
-import { JWT_STORAGE_KEY } from '../jwt/constant';
-import { requestGql, CREATE_OTP, VALIDATE_OTP, VALIDATE_PHONE, LOGIN_MUTATION } from './queries';
+import { setSession } from '../login/utils';
+import { STORAGE_KEY } from '../login/constant';
+import { CREATE_OTP, VALIDATE_OTP, VALIDATE_PHONE, LOGIN_MUTATION } from './queries';
+import { requestGql } from 'src/lib/graphqlRequest';
 
 export function useEmailLoginMutation() {
   return useMutation({
@@ -134,7 +135,7 @@ export function useValidateOtpMutation({ onSuccessLogin }) {
       try {
         await setSession(token);
       } catch {
-        sessionStorage.setItem(JWT_STORAGE_KEY, token);
+        sessionStorage.setItem(STORAGE_KEY, token);
         axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       }
       onSuccessLogin?.(token);

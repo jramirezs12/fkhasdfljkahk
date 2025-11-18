@@ -1,4 +1,4 @@
-import { AccountLayout } from 'src/sections/account/account-layout';
+import { AccountLayout } from 'src/sections/account/components/account-layout';
 
 // ----------------------------------------------------------------------
 

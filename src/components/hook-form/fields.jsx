@@ -1,5 +1,7 @@
 import { RHFRating } from './rhf-rating';
+import { RHFEditor } from './rhf-editor';
 import { RHFSlider } from './rhf-slider';
+import { RHFUpload } from './rhf-upload';
 import { RHFTextField } from './rhf-text-field';
 import { RHFRadioGroup } from './rhf-radio-group';
 import { RHFPhoneInput } from './rhf-phone-input';
@@ -14,6 +16,8 @@ import { RHFDatePicker, RHFTimePicker, RHFDateTimePicker } from './rhf-date-pick
 
 export const Field = {
   Select: RHFSelect,
+  Upload: RHFUpload,
+  Editor: RHFEditor,
   Switch: RHFSwitch,
   Slider: RHFSlider,
   Rating: RHFRating,

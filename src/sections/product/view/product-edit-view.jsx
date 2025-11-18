@@ -6,7 +6,7 @@ import { HomeContent } from 'src/layouts/home';
 
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { ProductCreateEditForm } from '../product-create-edit-form';
+import { ProductCreateEditForm } from '../components/product-create-edit-form';
 
 // ----------------------------------------------------------------------
 

@@ -4,7 +4,7 @@ import LoginView from 'src/auth/view/login/login-view';
 
 // ----------------------------------------------------------------------
 
-export const metadata = { title: `Sign in - ${CONFIG.appName}` };
+export const metadata = { title: `Login - ${CONFIG.appName}` };
 
 export default function Page() {
   return <LoginView />;

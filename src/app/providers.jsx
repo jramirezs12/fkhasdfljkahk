@@ -9,9 +9,9 @@ const makeQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: {
-        retry: 1,               // Un reintento es suficiente (evita loops ante errores parciales)
-        staleTime: 10_000,      // 10s “fresco” para navegación fluida sin refetch inmediato
-        gcTime: 5 * 60_000,     // 5 minutos en caché tras quedar inactivo
+        retry: 1,
+        staleTime: 10_000,
+        gcTime: 5 * 60_000,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
       },
@@ -19,7 +19,6 @@ const makeQueryClient = () =>
   });
 
 export function Providers({ children }) {
-  // Asegura una única instancia por montaje en el cliente
   const [queryClient] = React.useState(makeQueryClient);
 
   return (

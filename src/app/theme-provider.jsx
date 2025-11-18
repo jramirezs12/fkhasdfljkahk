@@ -3,10 +3,10 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider as ThemeVarsProvider } from '@mui/material/styles';
 
-import { useSettingsContext } from 'src/components/settings';
-
 import { createTheme } from 'src/theme/create-theme';
 import { Rtl } from 'src/theme/with-settings/right-to-left';
+
+import { useSettingsContext } from 'src/components/settings';
 
 // ----------------------------------------------------------------------
 

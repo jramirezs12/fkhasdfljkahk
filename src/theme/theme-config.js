@@ -1,5 +1,3 @@
-// ----------------------------------------------------------------------
-
 export const themeConfig = {
   /** **************************************
    * Base
@@ -19,7 +17,7 @@ export const themeConfig = {
    * Typography
    *************************************** */
   fontFamily: {
-    primary: 'Public Sans Variable',
+    primary: 'Prospero-Regular',
     secondary: 'Barlow',
   },
   /** **************************************
@@ -27,11 +25,11 @@ export const themeConfig = {
    *************************************** */
   palette: {
     primary: {
-      lighter: '#C8FAD6',
-      light: '#5BE49B',
-      main: '#00A76F',
-      dark: '#007867',
-      darker: '#004B50',
+      lighter: '#ECE7FF',   // muy claro para fondos / estados suaves
+      light: '#A891FF',     // variante clara para hover / accents
+      main: '#6E52E1',      // color principal solicitado
+      dark: '#4E38B8',      // tono más oscuro para contrastes
+      darker: '#2E1A66',    // tono muy oscuro para elementos destacados
       contrastText: '#FFFFFF',
     },
     secondary: {

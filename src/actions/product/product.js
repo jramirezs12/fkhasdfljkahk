@@ -70,6 +70,21 @@ function adaptItemToRow(item) {
 
   const stock = Number(item?.stock_saleable ?? 0);
 
+  const provider = item?.provider ?? null;
+
+  let warehouseId = null;
+  try {
+    const wp = provider?.warehouse_product ?? item?.provider?.warehouse_product ?? null;
+    if (Array.isArray(wp) && wp.length > 0) {
+      warehouseId = wp[0]?.warehouse_id ?? null;
+    } else if (wp && typeof wp === 'object') {
+      warehouseId = wp.warehouse_id ?? null;
+    }
+    if (warehouseId !== null) warehouseId = String(warehouseId);
+  } catch (err) {
+    warehouseId = null;
+  }
+
   return {
     id: item?.sku || item?.uid,
     sku: item?.sku,
@@ -85,6 +100,8 @@ function adaptItemToRow(item) {
     quantity: Math.max(stock, 1),
     publish: 'published',
     createdAt: null,
+    provider,
+    warehouseId,
   };
 }
 
@@ -131,9 +148,9 @@ export function useInfiniteProducts({
           pageSize,
           filter: normalized,
         });
-        return { ...res.products, _page: page };
+        return { ...res.dropshippingProducts , _page: page };
       } catch (err) {
-        const partial = err?.response?.data?.products;
+        const partial = err?.response?.data?.dropshippingProducts;
         if (partial) return { ...partial, _page: page };
         throw err;
       }
@@ -243,9 +260,9 @@ export function useGetProducts(params = {}) {
     };
     try {
       const res = await graphqlClient.request(PRODUCT_LIST, variables);
-      return res?.products ?? null;
+      return res?.dropshippingProducts  ?? null;
     } catch (err) {
-      const partial = err?.response?.data?.products;
+      const partial = err?.response?.data?.dropshippingProducts ;
       if (partial) return partial;
       return null;
     }

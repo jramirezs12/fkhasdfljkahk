@@ -12,7 +12,6 @@ import Grid from '@mui/material/Grid';
 import { paths } from 'src/routes/paths';
 
 import { HomeContent } from 'src/layouts/home';
-import { PRODUCT_PUBLISH_OPTIONS } from 'src/_mock';
 
 import { ProductDetailsReview } from '../components/product-details-review';
 import { ProductDetailsSummary } from '../components/product-details-summary';
@@ -44,7 +43,7 @@ export function ProductDetailsView({ product }) {
         liveHref={paths.product.details(`${product?.id}`)}
         publish={publish}
         onChangePublish={handleChangePublish}
-        publishOptions={PRODUCT_PUBLISH_OPTIONS}
+        product={product}
       />
 
       <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>

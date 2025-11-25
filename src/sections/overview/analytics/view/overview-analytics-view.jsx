@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
 import { CONFIG } from 'src/global-config';
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 import {
   _analyticTasks,
   _analyticPosts,
@@ -26,7 +26,7 @@ import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 
 export function OverviewAnalyticsView() {
   return (
-    <DashboardContent maxWidth="xl">
+    <HomeContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         ¡Bienvenido de nuevo! 👋
       </Typography>
@@ -179,6 +179,6 @@ export function OverviewAnalyticsView() {
           <AnalyticsTasks title="Tasks" list={_analyticTasks} />
         </Grid>
       </Grid>
-    </DashboardContent>
+    </HomeContent>
   );
 }

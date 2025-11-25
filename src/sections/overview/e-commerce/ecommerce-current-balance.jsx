@@ -42,7 +42,7 @@ export function EcommerceCurrentBalance({
           </Button>
 
           <Button fullWidth variant="contained" color="primary">
-            Transfer
+            Transferir
           </Button>
         </Box>
       </Box>

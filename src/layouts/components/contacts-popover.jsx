@@ -26,7 +26,7 @@ export function ContactsPopover({ data = [], sx, ...other }) {
   const renderMenuList = () => (
     <CustomPopover open={open} anchorEl={anchorEl} onClose={onClose}>
       <Typography variant="h6" sx={{ p: 1.5 }}>
-        Contacts <span>({data.length})</span>
+        Contactoss <span>({data.length})</span>
       </Typography>
 
       <Scrollbar sx={{ height: 320, width: 320 }}>

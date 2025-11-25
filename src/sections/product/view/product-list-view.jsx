@@ -26,11 +26,6 @@ import { ProductSearch } from '../components/product-search';
 import { ProductFilters } from '../components/product-filters';
 import { ProductTableFiltersResult as ProductFiltersResult } from '../components/product-table-filters-result';
 
-const PUBLISH_OPTIONS = [
-  { value: 'published', label: 'Published' },
-  { value: 'draft', label: 'Draft' },
-];
-
 export function ProductListView() {
   const openFilters = useBoolean();
 
@@ -114,7 +109,6 @@ export function ProductListView() {
           </Button>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
-        ZZZ
       />
 
       {productsError && (
@@ -144,8 +138,7 @@ export function ProductListView() {
               onClose={openFilters.onFalse}
               options={{
                 categories: categoriesOptions, // [{ value, label }]
-                stocks: stockOptions,
-                publishs: PUBLISH_OPTIONS,
+                stocks: stockOptions
               }}
             />
 
@@ -202,11 +195,6 @@ function applyFilter({ inputData, filters, sortBy }) {
   // Filtro por estado de inventario
   if (stock.length) {
     data = data.filter((p) => stock.includes(p.inventoryType));
-  }
-
-  // Filtro por publish (en este ejemplo todos vienen 'published', placeholder)
-  if (publish.length) {
-    data = data.filter((p) => publish.includes(p.publish));
   }
 
   return data;

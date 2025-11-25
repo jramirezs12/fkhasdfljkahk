@@ -3,7 +3,7 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 import { _bookings, _bookingNew, _bookingReview, _bookingsOverview } from 'src/_mock';
 import {
   BookingIllustration,
@@ -25,8 +25,8 @@ import { BookingCustomerReviews } from '../booking-customer-reviews';
 
 export function OverviewBookingView() {
   return (
-    <DashboardContent maxWidth="xl">
-      <Grid container spacing={3}>
+    <HomeContent maxWidth="xl">
+      < Grid container spacing={3} >
         <Grid size={{ xs: 12, md: 4 }}>
           <BookingWidgetSummary
             title="Total booking"
@@ -181,7 +181,7 @@ export function OverviewBookingView() {
             ]}
           />
         </Grid>
-      </Grid>
-    </DashboardContent>
+      </Grid >
+    </HomeContent >
   );
 }

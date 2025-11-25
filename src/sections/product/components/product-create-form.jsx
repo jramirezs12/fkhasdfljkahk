@@ -105,12 +105,12 @@ export function ProductCreateForm() {
     console.log('FORM DATA SUBMIT:', data);
 
     if (!Array.isArray(data.imagenes) || data.imagenes.length === 0) {
-      setErrorMessage('Debes cargar al menos una imagen PNG menor a 5MB');
+      setErrorMessage('Debes cargar al menos una imagen PNG menor a 500KB');
       return;
     }
 
     const validFiles = data.imagenes.filter(file =>
-      file.type === 'image/png' && file.size <= 5 * 1024 * 1024
+      file.type === 'image/png' && file.size <= 0.5 * 1024 * 1024
     );
     if (validFiles.length === 0) {
       setErrorMessage('Las imágenes deben ser PNG y menores a 5MB');
@@ -128,15 +128,15 @@ export function ProductCreateForm() {
 
     try {
       await mutateAsync({
-        nombre: data.nombre,
+        name: data.nombre,
         categoryId: data.categoryId,
-        sucursal: data.sucursal,
+        warehouse: data.sucursal,
         sku: data.sku,
-        precio: data.precio,
+        price: data.precio,
         stock: data.stock,
-        descripcionCorta: data.descripcionCorta,
-        descripcion: data.descripcion,
-        imagenes: cleanBase64Array,
+        shortDescription: data.descripcionCorta,
+        description: data.descripcion,
+        images: cleanBase64Array,
         files: validFiles
       });
 
@@ -248,7 +248,6 @@ export function ProductCreateForm() {
               accept={{ 'image/png': [] }}
               onRemove={handleRemoveFile}
               onRemoveAll={handleRemoveAllFiles}
-            //onUpload={() => console.info('ON UPLOAD')}
             />
           </Stack>
 

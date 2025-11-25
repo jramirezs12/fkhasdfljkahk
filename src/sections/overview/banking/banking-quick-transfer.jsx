@@ -116,7 +116,7 @@ export function BankingQuickTransfer({ title, subheader, list, sx, ...other }) {
   const renderInput = () => (
     <>
       <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-        Insert amount
+        Ingresar monto
       </Typography>
 
       <InputAmount
@@ -139,7 +139,7 @@ export function BankingQuickTransfer({ title, subheader, list, sx, ...other }) {
 
       <Box sx={{ my: 4, display: 'flex', alignItems: 'center', typography: 'subtitle1' }}>
         <Box component="span" sx={{ flexGrow: 1 }}>
-          Your balance
+          Tu saldo
         </Box>
         {fCurrency(34212)}
       </Box>
@@ -152,7 +152,7 @@ export function BankingQuickTransfer({ title, subheader, list, sx, ...other }) {
         disabled={amount === 0}
         onClick={confirmDialog.onTrue}
       >
-        Transfer now
+        Transferir ahora
       </Button>
     </>
   );
@@ -190,7 +190,7 @@ export function BankingQuickTransfer({ title, subheader, list, sx, ...other }) {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="overline" sx={{ color: 'text.secondary', flexGrow: 1 }}>
-              Recent
+              Reciente
             </Typography>
 
             <Button
@@ -199,7 +199,7 @@ export function BankingQuickTransfer({ title, subheader, list, sx, ...other }) {
               endIcon={<Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ ml: -0.5 }} />}
               sx={{ mr: -1 }}
             >
-              View all
+              Ver todo
             </Button>
           </Box>
 
@@ -218,7 +218,7 @@ export function BankingQuickTransfer({ title, subheader, list, sx, ...other }) {
 function ConfirmTransferDialog({ open, value, onBlur, onClose, onChange, contactInfo }) {
   return (
     <Dialog open={open} fullWidth maxWidth="xs" onClose={onClose} disableRestoreFocus>
-      <DialogTitle>Transfer to</DialogTitle>
+      <DialogTitle>Transferir a</DialogTitle>
 
       <Box
         sx={{
@@ -242,14 +242,13 @@ function ConfirmTransferDialog({ open, value, onBlur, onClose, onChange, contact
 
         <InputAmount onBlur={onBlur} onChange={onChange} value={value} />
 
-        <TextField fullWidth multiline rows={3} placeholder="Write a message..." />
+        <TextField fullWidth multiline rows={3} placeholder="Escribe un mensaje..." />
       </Box>
 
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-
+        <Button onClick={onClose}>Cancelar</Button>
         <Button variant="contained" disabled={value === '0'} onClick={onClose}>
-          Transfer
+          Transferir
         </Button>
       </DialogActions>
     </Dialog>

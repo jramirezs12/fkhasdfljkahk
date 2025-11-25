@@ -85,6 +85,13 @@ export const ME_QUERY = gql`
           }
         }
       }
+      dropshipping_user {
+        id
+        role_code
+        role_id
+        status
+        user_id
+      }
     }
   }
 `;

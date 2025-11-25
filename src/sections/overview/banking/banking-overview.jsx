@@ -18,15 +18,15 @@ import { Chart, useChart } from 'src/components/chart';
 
 const TABS = [
   {
-    value: 'income',
-    label: 'Income',
+    value: 'ingresos',
+    label: 'Ingresos',
     percent: 8.2,
     total: 9990,
     chart: { series: [{ data: [5, 31, 33, 50, 99, 76, 72, 76, 89] }] },
   },
   {
-    value: 'expenses',
-    label: 'Expenses',
+    value: 'gastos',
+    label: 'Gastos',
     percent: -6.6,
     total: 1989,
     chart: { series: [{ data: [10, 41, 35, 51, 49, 62, 69, 91, 148] }] },
@@ -36,10 +36,10 @@ const TABS = [
 export function BankingOverview({ sx, ...other }) {
   const theme = useTheme();
 
-  const tabs = useTabs('income');
+  const tabs = useTabs('ingresos');
 
   const chartColors =
-    tabs.value === 'income' ? [theme.palette.primary.dark] : [theme.palette.warning.dark];
+    tabs.value === 'ingresos' ? [theme.palette.primary.dark] : [theme.palette.warning.dark];
 
   const chartOptions = useChart({
     colors: chartColors,
@@ -79,21 +79,21 @@ export function BankingOverview({ sx, ...other }) {
         size="small"
         startIcon={<Iconify width={16} icon="eva:arrow-upward-fill" />}
       >
-        Send
+        Enviar
       </Button>
       <Button
         variant="soft"
         size="small"
         startIcon={<Iconify width={16} icon="mingcute:add-line" />}
       >
-        Add card
+        Recargar
       </Button>
       <Button
         variant="soft"
         size="small"
         startIcon={<Iconify width={16} icon="eva:arrow-downward-fill" />}
       >
-        Request
+        Pedir
       </Button>
     </Box>
   );
@@ -140,7 +140,7 @@ export function BankingOverview({ sx, ...other }) {
                   justifyContent: 'center',
                   bgcolor: 'primary.darker',
                   display: { xs: 'none', md: 'inline-flex' },
-                  ...(tab.value === 'expenses' && {
+                  ...(tab.value === 'gastos' && {
                     color: 'warning.lighter',
                     bgcolor: 'warning.darker',
                   }),
@@ -149,7 +149,7 @@ export function BankingOverview({ sx, ...other }) {
                 <Iconify
                   width={24}
                   icon={
-                    tab.value === 'expenses'
+                    tab.value === 'gastos'
                       ? 'eva:diagonal-arrow-right-up-fill'
                       : 'eva:diagonal-arrow-left-down-fill'
                   }
@@ -215,12 +215,12 @@ export function BankingOverview({ sx, ...other }) {
 
       {renderTabs()}
 
-      <Chart
+      {/* <Chart
         type="line"
-        series={tabs.value === 'income' ? TABS[0].chart.series : TABS[1].chart.series}
+        series={tabs.value === 'ingresos' ? TABS[0].chart.series : TABS[1].chart.series}
         options={chartOptions}
         sx={{ height: 270 }}
-      />
+      /> */}
     </Card>
   );
 }

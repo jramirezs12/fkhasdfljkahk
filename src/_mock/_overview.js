@@ -122,13 +122,15 @@ export const _analyticTraffic = [
 // ECOMMERCE
 // ----------------------------------------------------------------------
 
-export const _ecommerceSalesOverview = ['Total profit', 'Total income', 'Total expenses'].map(
-  (label, index) => ({
-    label,
-    totalAmount: _mock.number.price(index) * 100,
-    value: _mock.number.percent(index),
-  })
-);
+export const _ecommerceSalesOverview = [
+  'Ganancias totales',
+  'Ingresos totales',
+  'Gastos totales',
+].map((label, index) => ({
+  label,
+  totalAmount: _mock.number.price(index) * 100,
+  value: _mock.number.percent(index),
+}));
 
 export const _ecommerceBestSalesman = Array.from({ length: 5 }, (_, index) => {
   const category = ['CAP', 'Branded shoes', 'Headphone', 'Cell phone', 'Earings'][index];
@@ -209,7 +211,7 @@ export const _bankingRecentTransitions = [
     id: _mock.id(2),
     name: _mock.fullName(2),
     avatarUrl: _mock.image.avatar(2),
-    type: 'Income',
+    type: 'Ingresos',
     message: 'Receive money from',
     category: 'Annette black',
     date: _mock.time(2),
@@ -220,7 +222,7 @@ export const _bankingRecentTransitions = [
     id: _mock.id(3),
     name: _mock.fullName(3),
     avatarUrl: _mock.image.avatar(3),
-    type: 'Expenses',
+    type: 'Gastos',
     message: 'Payment for',
     category: 'Courtney henry',
     date: _mock.time(3),
@@ -242,7 +244,7 @@ export const _bankingRecentTransitions = [
     id: _mock.id(5),
     name: null,
     avatarUrl: null,
-    type: 'Expenses',
+    type: 'Gastos',
     message: 'Payment for',
     category: 'Fast food',
     date: _mock.time(5),
@@ -253,7 +255,7 @@ export const _bankingRecentTransitions = [
     id: _mock.id(6),
     name: null,
     avatarUrl: null,
-    type: 'Expenses',
+    type: 'Gastos',
     message: 'Payment for',
     category: 'Fitness',
     date: _mock.time(6),

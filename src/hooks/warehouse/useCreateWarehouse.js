@@ -1,15 +1,24 @@
+'use client';
+
 import { useMutation } from '@tanstack/react-query';
 
-import { createWarehouse } from 'src/sections/warehouse/context/warehouse/action';
+import { useRouter } from 'src/routes/hooks';
+
+import { createWarehouse } from '../../actions/warehouses/createWarehouse';
 
 export function useCreateWarehouse() {
-  return useMutation({
-    mutationFn: createWarehouse,
-    onSuccess: (warehouse) => {
-      //toast.success(`✅ Bodega "${warehouse.name}" creada exitosamente`);
-    },
-    onError: (error) => {
-      //toast.error(`❌ Error al crear la bodega: ${error.message}`);
-    },
-  });
-}
+    const router = useRouter();
+
+    return useMutation({
+        mutationFn: createWarehouse,
+        onSuccess: async () => {
+            router.replace('/home/warehouse');
+            router.refresh();
+        },
+        onError: (error) => {
+            console.error(error);
+        }
+    });
+};
+
+export default useCreateWarehouse;

@@ -3,12 +3,13 @@
 import { useSetState } from 'minimal-shared/hooks';
 import { useMemo, useEffect, useCallback } from 'react';
 
+import { requestGql } from 'src/lib/graphqlRequest';
+
 import { ME_QUERY } from 'src/auth/context/login/queries';
 
 import { STORAGE_KEY } from './constant';
 import { AuthContext } from '../auth-context';
 import { setSession, isValidToken } from './utils';
-import { requestGql } from 'src/lib/graphqlRequest';
 
 export function AuthProvider({ children }) {
   const { state, setState } = useSetState({ user: null, loading: true });
@@ -50,6 +51,13 @@ export function AuthProvider({ children }) {
 
           const identificationNumber = getCustom('numero_identificacion_usuario')?.value ?? null;
 
+          // dropshipping_user (nuevo campo que contiene role y demás)
+          const dropship = c?.dropshipping_user ?? null;
+          const dropshipRoleCode = dropship?.role_code ?? null;
+          const dropshipRoleId = dropship?.role_id ?? null;
+          const dropshipStatus = dropship?.status ?? null;
+          const dropshipUserId = dropship?.user_id ?? null;
+
           setState({
             user: {
               id: c.id ?? null,
@@ -62,28 +70,37 @@ export function AuthProvider({ children }) {
               middlename: c.middlename,
               address: primaryAddress
                 ? {
-                    defaultShipping: !!primaryAddress.default_shipping,
-                    countryCode: primaryAddress.country_code ?? null,
-                    countryId: primaryAddress.country_id ?? null,
-                    city: primaryAddress.city ?? null,
-                    postcode: primaryAddress.postcode ?? null,
-                    telephone: primaryAddress.telephone ?? null,
-                    company: primaryAddress.company ?? null,
-                    firstName: primaryAddress.firstname ?? null,
-                    lastName: primaryAddress.lastname ?? null,
-                    region: {
-                      name: regionName,
-                      code: regionCode,
-                      id: regionId,
-                    },
-                    street,
-                    streetLines,
-                    suffix: primaryAddress.suffix ?? null,
-                  }
+                  defaultShipping: !!primaryAddress.default_shipping,
+                  countryCode: primaryAddress.country_code ?? null,
+                  countryId: primaryAddress.country_id ?? null,
+                  city: primaryAddress.city ?? null,
+                  postcode: primaryAddress.postcode ?? null,
+                  telephone: primaryAddress.telephone ?? null,
+                  company: primaryAddress.company ?? null,
+                  firstName: primaryAddress.firstname ?? null,
+                  lastName: primaryAddress.lastname ?? null,
+                  region: {
+                    name: regionName,
+                    code: regionCode,
+                    id: regionId,
+                  },
+                  street,
+                  streetLines,
+                  suffix: primaryAddress.suffix ?? null,
+                }
                 : null,
               identificationType,
               identificationTypeValue,
               identificationNumber,
+              dropshipping: dropship
+                ? {
+                  roleCode: dropshipRoleCode,
+                  roleId: dropshipRoleId,
+                  status: dropshipStatus,
+                  userId: dropshipUserId,
+                }
+                : null,
+              role: dropshipRoleCode.toLowerCase() ?? null,
               accessToken,
             },
             loading: false,
@@ -108,7 +125,7 @@ export function AuthProvider({ children }) {
 
   const memoizedValue = useMemo(
     () => ({
-      user: state.user ? { ...state.user, role: state.user?.role ?? 'admin' } : null,
+      user: state.user ?? null,
       checkUserSession,
       loading: status === 'loading',
       authenticated: status === 'authenticated',

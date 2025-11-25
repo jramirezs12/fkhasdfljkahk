@@ -2,19 +2,39 @@ import { gql } from 'graphql-request';
 
 export const PRODUCT_LIST = gql`
   query productListAux($currentPage: Int!, $pageSize: Int!, $filter: ProductAttributeFilterInput!) {
-    products(currentPage: $currentPage, pageSize: $pageSize, filter: $filter) {
-      page_info { total_pages }
+    dropshippingProducts(currentPage: $currentPage, pageSize: $pageSize, filter: $filter) {
+      page_info {
+        total_pages
+      }
       items {
         name
         sku
         uid
-        image { url }
+        image {
+          url
+        }
         stock_saleable
-        categories { name uid }
+        categories {
+          name
+          uid
+        }
         price_range {
           minimum_price {
-            regular_price { value }
-            final_price { value }
+            regular_price {
+              value
+            }
+            final_price {
+              value
+            }
+          }
+        }
+        provider {
+          id
+          name
+          warehouse_product {
+            id
+            product_id
+            warehouse_id
           }
         }
       }
@@ -24,8 +44,8 @@ export const PRODUCT_LIST = gql`
 `;
 
 export const PRODUCT_BY_SKU = gql`
-  query productVariants($sku: String!) {
-    products(filter: { sku: { eq: $sku } }) {
+  query productVariants($sku: String!, $provider_id: FilterEqualTypeInput) {
+    dropshippingProducts(filter: { sku: { eq: $sku } }, provider_id: $provider_id) {
       total_count
       items {
         __typename
@@ -42,15 +62,27 @@ export const PRODUCT_BY_SKU = gql`
         }
         price_range {
           minimum_price {
-            regular_price { value }
-            final_price { value }
-            discount { amount_off percent_off }
+            regular_price {
+              value
+            }
+            final_price {
+              value
+            }
+            discount {
+              amount_off
+              percent_off
+            }
           }
         }
         custom_attributes_info {
-          items { code value }
+          items {
+            code
+            value
+          }
         }
-        image { url }
+        image {
+          url
+        }
         ... on ConfigurableProduct {
           configurable_product_options_selection {
             configurable_options {
@@ -61,7 +93,9 @@ export const PRODUCT_BY_SKU = gql`
                 label
                 is_available
                 uid
-                swatch { image_url }
+                swatch {
+                  image_url
+                }
               }
             }
           }
@@ -71,18 +105,33 @@ export const PRODUCT_BY_SKU = gql`
               stock_saleable
               sku
               name
-              categories { name uid level }
+              categories {
+                name
+                uid
+                level
+              }
               price_range {
                 minimum_price {
-                  regular_price { value }
-                  final_price { value }
-                  discount { amount_off percent_off }
+                  regular_price {
+                    value
+                  }
+                  final_price {
+                    value
+                  }
+                  discount {
+                    amount_off
+                    percent_off
+                  }
                 }
               }
-              image { url }
+              image {
+                url
+              }
               stock_status
             }
-            attributes { uid }
+            attributes {
+              uid
+            }
           }
         }
         media_gallery {
@@ -91,43 +140,48 @@ export const PRODUCT_BY_SKU = gql`
           position
           url
         }
+        provider {
+          id
+          name
+          warehouse_product {
+            id
+            product_id
+            warehouse_id
+          }
+        }
       }
     }
   }
 `;
 
 export const SHIPPING_QUOTE_MUTATION = gql`
-query ShippingQuote($destinationCityName: String!, $qty: Int!, $productId: Int!) {
+  query ShippingQuote($destinationCityName: String!, $qty: Int!, $productId: Int!) {
     shippingQuote(
-        dataForQuote: {
-            destinationCityName: $destinationCityName
-            qty: $qty
-            productId: $productId
-        }
-    )   {
-        dateDelivery
-        deliveryDays
-        price
+      dataForQuote: { destinationCityName: $destinationCityName, qty: $qty, productId: $productId }
+    ) {
+      dateDelivery
+      deliveryDays
+      price
     }
-}
+  }
 `;
 
 export const CREATE_SIMPLE_PRODUCT_MUTATION = gql`
-  mutation CreateSimpleProduct (
-    $name: String!,
-    $categoryId: String!,
-    $sku: String!,
-    $price: Float!,
-    $sucursal: Int!,
-    $descripcionCorta: String!,
-    $descripcion: String!,
-    $qty: Float!,
-    $inStock: Boolean!,
+  mutation CreateSimpleProduct(
+    $name: String!
+    $categoryId: String!
+    $sku: String!
+    $price: Float!
+    $warehouse: Int!
+    $shortDescription: String!
+    $description: String!
+    $qty: Float!
+    $inStock: Boolean!
     $mediaGallery: [MediaGalleryEntryInput!]!
   ) {
     createSimpleProduct(
-      input:{
-        product:{
+      input: {
+        product: {
           name: $name
           attribute_set_id: 4
           sku: $sku
@@ -137,36 +191,83 @@ export const CREATE_SIMPLE_PRODUCT_MUTATION = gql`
           visibility: 4
           status: 1
           extension_attributes: {
-            category_links: [
-              {
-                position: 0
-                category_id: $categoryId
-              }
-            ]
-            stock_item: {
-              qty: $qty
-              is_in_stock: $inStock
-            }
+            category_links: [{ position: 0, category_id: $categoryId }]
+            stock_item: { qty: $qty, is_in_stock: $inStock }
           }
-          custom_attributes:[
-            {
-                attribute_code: "description"
-                value: $descripcion
-            },
-            {
-                attribute_code: "short_description"
-                value: $descripcionCorta 
-            }
+          custom_attributes: [
+            { attribute_code: "description", value: $description }
+            { attribute_code: "short_description", value: $shortDescription }
           ]
           media_gallery_entries: $mediaGallery
         }
-        warehouse_id: $sucursal
+        warehouse_id: $warehouse
       }
-    ),
-    {
+    ) {
       sku
       success
       message
+    }
+  }
+`;
+
+// Query para traer las dropshippingProducts filtradas por provider_id (AHORA INCLUYE warehouse_product)
+export const GET_PROVIDER_PRODUCTS = gql`
+  query GetProviderProducts(
+    $providerId: String!
+    $currentPage: Int!
+    $pageSize: Int!
+    $filter: ProductAttributeFilterInput!
+  ) {
+    dropshippingProducts(
+      currentPage: $currentPage
+      pageSize: $pageSize
+      filter: $filter
+      provider_id: { eq: $providerId }
+    ) {
+      page_info {
+        total_pages
+      }
+      items {
+        id
+        uid
+        sku
+        name
+        stock_status
+        stock_saleable
+        image {
+          url
+        }
+        categories {
+          name
+          uid
+        }
+        price_range {
+          minimum_price {
+            regular_price {
+              value
+            }
+            final_price {
+              value
+            }
+          }
+        }
+        media_gallery {
+          disabled
+          label
+          position
+          url
+        }
+        provider {
+          id
+          name
+          warehouse_product {
+            id
+            product_id
+            warehouse_id
+          }
+        }
+      }
+      total_count
     }
   }
 `;

@@ -130,9 +130,9 @@ export const _emails = [
 export const _fullNames = [
   `Jayvion Simon`,
   `Lucian Obrien`,
-  `Deja Brady`,
-  `Harrison Stein`,
-  `Reece Chung`,
+  `Daniel Santana`,
+  `Juan Ramirez`,
+  `Daniel Perez`,
   `Lainey Davidson`,
   `Cristopher Cardenas`,
   `Melanie Noble`,

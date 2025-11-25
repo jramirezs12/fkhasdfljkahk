@@ -4,7 +4,7 @@ import graphqlClient from 'src/lib/graphqlClient';
 
 import { CREATE_SIMPLE_PRODUCT_MUTATION } from './queries';
 
-export const createProduct = async ({ nombre, categoryId, sucursal, sku, precio, stock, descripcionCorta, descripcion, imagenes, files }) => {
+export const createProduct = async ({ name, categoryId, warehouse, sku, price, stock, shortDescription, description, images, files }) => {
     const mediaGallery = files.map((file, index) => {
         const label = file.name.replace(/\.[^/.]+$/, "");
         return {            
@@ -14,23 +14,21 @@ export const createProduct = async ({ nombre, categoryId, sucursal, sku, precio,
             disabled: false,
             types: index == 0 ? ["image", "small_image", "thumbnail"] : ["image"],
             content: {
-                base64_encoded_data: imagenes[index],
+                base64_encoded_data: images[index],
                 type: file.type,
                 name: file.name
             }
         };
     });
 
-    console.log('MEDIA GALLERY ENTRIES:', mediaGallery);
-
     const variables = {
-        name: nombre,
+        name,
         categoryId,
         sku,
-        price: parseFloat(precio),
-        sucursal: parseInt(sucursal),
-        descripcionCorta,
-        descripcion,
+        price: parseFloat(price),
+        warehouse: parseInt(warehouse),
+        shortDescription,
+        description,
         qty: parseFloat(stock),
         inStock: parseFloat(stock) > 0 ? true : false,
         mediaGallery
@@ -38,7 +36,6 @@ export const createProduct = async ({ nombre, categoryId, sucursal, sku, precio,
 
     try {
         const result = await graphqlClient.request(CREATE_SIMPLE_PRODUCT_MUTATION, variables);
-        console.log('RESULT GRAPHQL:', result);
         const data = result.createSimpleProduct;
 
         if (!data.success) {
@@ -48,6 +45,8 @@ export const createProduct = async ({ nombre, categoryId, sucursal, sku, precio,
         return true;
     } catch (error) {
         console.error(error);
-        throw error.response.errors[0].message;
+        if (error.response?.errors && error.response.errors.length > 0)
+            throw error.response.errors[0].message;
+        throw new Error('Error al crear producto');
     }
 };

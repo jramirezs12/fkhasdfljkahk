@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 import { MotivationIllustration } from 'src/assets/illustrations';
 import {
   _ecommerceNewProducts,
@@ -33,8 +33,8 @@ export function OverviewEcommerceView() {
   const theme = useTheme();
 
   return (
-    <DashboardContent maxWidth="xl">
-      <Grid container spacing={3}>
+    <HomeContent maxWidth="xl">
+      < Grid container spacing={3} >
         <Grid size={{ xs: 12, md: 8 }}>
           <EcommerceWelcome
             title={`Congratulations 🎉  \n ${user?.displayName}`}
@@ -128,11 +128,11 @@ export function OverviewEcommerceView() {
                   name: '2022',
                   data: [
                     {
-                      name: 'Total income',
+                      name: 'Total ingresos',
                       data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49],
                     },
                     {
-                      name: 'Total expenses',
+                      name: 'Total gastos',
                       data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77],
                     },
                   ],
@@ -141,11 +141,11 @@ export function OverviewEcommerceView() {
                   name: '2023',
                   data: [
                     {
-                      name: 'Total income',
+                      name: 'Total ingresos',
                       data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49],
                     },
                     {
-                      name: 'Total expenses',
+                      name: 'Total gastos',
                       data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77],
                     },
                   ],
@@ -161,7 +161,7 @@ export function OverviewEcommerceView() {
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <EcommerceCurrentBalance
-            title="Current balance"
+            title="Saldo actual"
             earning={25500}
             refunded={1600}
             orderTotal={287650}
@@ -186,7 +186,7 @@ export function OverviewEcommerceView() {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <EcommerceLatestProducts title="Latest products" list={_ecommerceLatestProducts} />
         </Grid>
-      </Grid>
-    </DashboardContent>
+      </Grid >
+    </HomeContent >
   );
 }

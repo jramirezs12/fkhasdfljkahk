@@ -91,7 +91,7 @@ const CONTENT = `
   <li>Update and refresh displays to support new product launches, festive campaigns, and seasonal promotions.</li>
   <li>Plan and manage store openings, renovations, and closing procedures to ensure smooth execution.</li>
   <li>Monitor and follow up on store maintenance activities and maintain accurate SKU in/out records.</li>
-  <li>Control expenses and ensure all activities stay within the approved budget.</li>
+  <li>Control gastos and ensure all activities stay within the approved budget.</li>
   <li>Work closely with suppliers to source materials, props, and display elements.</li>
 </ul>
 

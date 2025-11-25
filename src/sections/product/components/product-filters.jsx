@@ -51,7 +51,7 @@ export function ProductFilters({ open, canReset, onOpen, onClose, filters, optio
   const renderCategories = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-        Categories
+        Categorias
       </Typography>
       {(options?.categories || []).map((opt) => (
         <FormControlLabel

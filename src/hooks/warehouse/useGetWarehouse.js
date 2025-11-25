@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { requestGql } from 'src/lib/graphqlRequest';
 
-import { GET_WAREHOUSES } from './queries';
+import { GET_WAREHOUSES } from '../../actions/warehouses/queries';
 
 export function useGetWarehouse() {
   const [warehouses, setWarehouses] = useState([]);

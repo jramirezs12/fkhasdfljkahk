@@ -4,6 +4,7 @@ import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 
 import { CONFIG } from 'src/global-config';
+import { LocalizationProvider } from 'src/locales';
 import { themeConfig, ThemeProvider, primary as primaryColor } from 'src/theme';
 
 import { Snackbar } from 'src/components/snackbar';
@@ -71,21 +72,23 @@ export default async function RootLayout({ children }) {
             cookieSettings={appConfig.cookieSettings}
             defaultSettings={defaultSettings}
           >
-            <AppRouterCacheProvider options={{ key: 'css' }}>
-              <ThemeProvider
-                modeStorageKey={themeConfig.modeStorageKey}
-                defaultMode={themeConfig.defaultMode}
-              >
-                <MotionLazy>
-                  <ProgressBar />
-                  <SettingsDrawer defaultSettings={defaultSettings} />
-                  <CheckoutProvider>
-                    <Snackbar />
-                    <Providers>{children}</Providers>
-                  </CheckoutProvider>
-                </MotionLazy>
-              </ThemeProvider>
-            </AppRouterCacheProvider>
+            <LocalizationProvider>
+              <AppRouterCacheProvider options={{ key: 'css' }}>
+                <ThemeProvider
+                  modeStorageKey={themeConfig.modeStorageKey}
+                  defaultMode={themeConfig.defaultMode}
+                >
+                  <MotionLazy>
+                    <ProgressBar />
+                    <SettingsDrawer defaultSettings={defaultSettings} />
+                    <CheckoutProvider>
+                      <Snackbar />
+                      <Providers>{children}</Providers>
+                    </CheckoutProvider>
+                  </MotionLazy>
+                </ThemeProvider>
+              </AppRouterCacheProvider>
+            </LocalizationProvider>
           </SettingsProvider>
         </AuthProvider>
       </body>

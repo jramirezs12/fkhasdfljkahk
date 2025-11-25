@@ -1,16 +1,19 @@
-import { usePopover } from 'minimal-shared/hooks';
+'use client';
+
+import { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
-import MenuList from '@mui/material/MenuList';
-import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 
+import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
 import { Iconify } from 'src/components/iconify';
-import { CustomPopover } from 'src/components/custom-popover';
+import { WishlistModal } from 'src/components/wishlist/wishlist-modal';
+
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -22,77 +25,61 @@ export function ProductDetailsToolbar({
   liveHref,
   publishOptions,
   onChangePublish,
+  product,
   ...other
 }) {
-  const menuActions = usePopover();
+  const [openWishlist, setOpenWishlist] = useState(false);
 
-  const renderMenuActions = () => (
-    <CustomPopover
-      open={menuActions.open}
-      anchorEl={menuActions.anchorEl}
-      onClose={menuActions.onClose}
-      slotProps={{ arrow: { placement: 'top-right' } }}
-    >
-      <MenuList>
-        {publishOptions.map((option) => (
-          <MenuItem
-            key={option.value}
-            selected={option.value === publish}
-            onClick={() => {
-              menuActions.onClose();
-              onChangePublish(option.value);
-            }}
-          >
-            {option.value === 'published' && <Iconify icon="eva:cloud-upload-fill" />}
-            {option.value === 'draft' && <Iconify icon="solar:file-text-bold" />}
-            {option.label}
-          </MenuItem>
-        ))}
-      </MenuList>
-    </CustomPopover>
-  );
+  const { user } = useAuthContext() ?? {};
+  const dropshipping = user?.dropshipping_user ?? user?.dropshipping ?? null;
+
+  const roleCode = String(dropshipping?.role_code ?? dropshipping?.roleCode ?? user?.role ?? '').toLowerCase();
+  const roleId = String(dropshipping?.role_id ?? dropshipping?.roleId ?? '').toLowerCase();
+
+  const isProvider =
+    roleCode.includes('provider') || roleCode.includes('prov') || roleId.includes('provider') || roleId.includes('prov');
+
+  const isDropper =
+    roleCode.includes('dropper') || roleCode.includes('drop') || String(user?.role ?? '').toLowerCase().includes('dropper');
+
+  let computedBackHref;
+  if (isProvider) {
+    computedBackHref = paths.home.product.list;
+  } else if (isDropper) {
+    computedBackHref = paths.home.product.root;
+  } else {
+    computedBackHref = backHref ?? paths.home.root;
+  }
 
   return (
-    <>
-      <Box
-        sx={[
-          { gap: 1.5, display: 'flex', mb: { xs: 3, md: 5 } },
-          ...(Array.isArray(sx) ? sx : [sx]),
-        ]}
-        {...other}
+    <Box
+      sx={[
+        { gap: 1.5, display: 'flex', mb: { xs: 3, md: 5 } },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+      {...other}
+    >
+      <Button
+        component={RouterLink}
+        href={computedBackHref}
+        startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
       >
-        <Button
-          component={RouterLink}
-          href={backHref}
-          startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
-        >
-          Back
-        </Button>
+        Back
+      </Button>
 
-        <Box sx={{ flexGrow: 1 }} />
+      <Box sx={{ flexGrow: 1 }} />
 
-        {publish === 'published' && (
-          <Tooltip title="Go live">
-            <IconButton component={RouterLink} href={liveHref}>
-              <Iconify icon="eva:external-link-fill" />
-            </IconButton>
-          </Tooltip>
-        )}
+      {publish === 'published' && !isProvider && (
+        <Tooltip title="Agregar a favoritos">
+          <IconButton onClick={() => setOpenWishlist(true)}>
+            <Iconify icon="solar:heart-bold" />
+          </IconButton>
+        </Tooltip>
+      )}
 
-        <Button
-          color="inherit"
-          variant="contained"
-          loading={!publish}
-          loadingIndicator="Loading…"
-          endIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
-          onClick={menuActions.onOpen}
-          sx={{ textTransform: 'capitalize' }}
-        >
-          {publish}
-        </Button>
-      </Box>
-
-      {renderMenuActions()}
-    </>
+      <WishlistModal open={openWishlist} onClose={() => setOpenWishlist(false)} product={product} />
+    </Box>
   );
 }
+
+export default ProductDetailsToolbar;

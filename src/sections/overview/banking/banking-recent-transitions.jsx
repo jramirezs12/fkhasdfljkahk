@@ -88,12 +88,12 @@ function RowItem({ row }) {
     <Box sx={{ position: 'relative' }}>
       <Badge
         overlap="circular"
-        color={row.type === 'Income' ? 'success' : 'error'}
+        color={row.type === 'Ingresos' ? 'success' : 'error'}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         badgeContent={
           <Iconify
             icon={
-              row.type === 'Income'
+              row.type === 'Ingresos'
                 ? 'eva:diagonal-arrow-left-down-fill'
                 : 'eva:diagonal-arrow-right-up-fill'
             }

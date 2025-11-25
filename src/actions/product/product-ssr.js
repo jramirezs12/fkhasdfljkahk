@@ -1,4 +1,4 @@
-// Archivo de servidor (NO 'use client')
+'use server';
 
 import { headers } from 'next/headers';
 import { GraphQLClient } from 'graphql-request';
@@ -76,11 +76,41 @@ function adaptProductFromMagento(raw) {
   const inventoryType =
     available > 0 || stockStatus === 'IN_STOCK' ? 'in stock' : 'out of stock';
 
-  // Proveedor: intenta custom attr; si no, usa primera categoría como fallback
-  const provider =
-    providerAttr ||
-    (Array.isArray(raw.categories) && raw.categories[0]?.name) ||
-    null;
+  let provider = null;
+  const rawProvider = raw?.provider ?? null;
+
+  if (rawProvider) {
+    if (typeof rawProvider === 'object') {
+      provider = {
+        id: rawProvider.id ?? rawProvider.uid ?? null,
+        // eslint-disable-next-line no-constant-binary-expression
+        name: rawProvider.name ?? rawProvider.label ?? String(rawProvider) ?? null,
+        image: rawProvider?.image?.url ?? null,
+        warehouse_product: rawProvider?.warehouse_product ?? null,
+      };
+    } else {
+      provider = { id: null, name: String(rawProvider) };
+    }
+  } else if (providerAttr) {
+    provider = { id: null, name: providerAttr };
+  } else if (Array.isArray(raw.categories) && raw.categories[0]?.name) {
+    provider = { id: null, name: raw.categories[0].name };
+  } else {
+    provider = null;
+  }
+
+  let warehouseId = null;
+  try {
+    const wp = provider?.warehouse_product ?? raw.provider?.warehouse_product ?? null;
+    if (Array.isArray(wp) && wp.length > 0) {
+      warehouseId = wp[0]?.warehouse_id ?? null;
+    } else if (wp && typeof wp === 'object') {
+      warehouseId = wp.warehouse_id ?? null;
+    }
+    if (warehouseId !== null) warehouseId = String(warehouseId);
+  } catch (err) {
+    warehouseId = null;
+  }
 
   // Labels (si quieres mantenerlos)
   const percentOff = num(min?.discount?.percent_off, 0);
@@ -107,6 +137,9 @@ function adaptProductFromMagento(raw) {
     provider,
     providerPrice,
     suggestedPrice,
+
+    // Warehouse id (string) asociado al producto/proveedor (si existe)
+    warehouseId,
 
     // Imágenes para el carrusel
     images: unique(galleryUrls),
@@ -171,7 +204,7 @@ function resolveGraphqlUrlSSR() {
 }
 
 // ---------- Acción SSR ----------
-export async function getProduct(sku) {
+export async function getProduct(sku, providerId = null) {
   const endpoint = resolveGraphqlUrlSSR();
 
   const client = new GraphQLClient(endpoint, {
@@ -179,6 +212,10 @@ export async function getProduct(sku) {
   });
 
   const variables = { sku: String(sku) };
+  // Si se pasa providerId, enviarlo como FilterEqualTypeInput { eq: providerId }
+  if (providerId) {
+    variables.provider_id = { eq: String(providerId) };
+  }
 
   let data;
   try {
@@ -192,7 +229,7 @@ export async function getProduct(sku) {
     return { product: null, error: { status: err?.response?.status || 500, message: err.message } };
   }
 
-  const items = data?.products?.items || [];
+  const items = data?.dropshippingProducts?.items || [];
   if (!items.length) return { product: null };
 
   return { product: adaptProductFromMagento(items[0]) };

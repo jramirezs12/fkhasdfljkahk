@@ -130,7 +130,7 @@ function CarouselItem({ item, showCurrency, onToggleCurrency }) {
         </IconButton>
 
         <div>
-          <Box sx={{ mb: 1.5, typography: 'subtitle2', opacity: 0.48 }}>Current balance</Box>
+          <Box sx={{ mb: 1.5, typography: 'subtitle2', opacity: 0.48 }}>Saldo actual</Box>
 
           <Box sx={{ gap: 1, display: 'flex', alignItems: 'center' }}>
             <Box component="span" sx={{ typography: 'h4' }}>

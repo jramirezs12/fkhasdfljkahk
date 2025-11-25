@@ -7,7 +7,7 @@ import { cardClasses } from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 
 import { CONFIG } from 'src/global-config';
-import { DashboardContent } from 'src/layouts/dashboard';
+import { HomeContent } from 'src/layouts/home';
 import { _coursesContinue, _coursesFeatured, _coursesReminder } from 'src/_mock';
 
 import { CourseProgress } from '../course-progress';
@@ -23,7 +23,7 @@ import { CourseWidgetSummary } from '../course-widget-summary';
 
 export function OverviewCourseView() {
   return (
-    <DashboardContent
+    <HomeContent
       maxWidth={false}
       disablePadding
       sx={[
@@ -166,6 +166,6 @@ export function OverviewCourseView() {
           <CourseReminders title="Reminders" list={_coursesReminder} />
         </Box>
       </Box>
-    </DashboardContent>
+    </HomeContent>
   );
 }

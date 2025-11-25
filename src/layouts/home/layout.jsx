@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
@@ -8,28 +9,26 @@ import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import { iconButtonClasses } from '@mui/material/IconButton';
 
-import { _contacts, _notifications } from 'src/_mock';
+import { usePathname } from 'src/routes/hooks';
+
+import { _notifications } from 'src/_mock';
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
 
-import { useMockedUser } from 'src/auth/hooks';
+// Usuario real desde AuthProvider
+import { useAuthContext } from 'src/auth/hooks';
+import { RoleBasedGuard } from 'src/auth/guard/role-based-guard';
 
 import { NavMobile } from './nav-mobile';
 import { VerticalDivider } from './content';
 import { NavVertical } from './nav-vertical';
 import { NavHorizontal } from './nav-horizontal';
 import { _account } from '../nav-config-account';
-import { Searchbar } from '../components/searchbar';
-import { _workspaces } from '../nav-config-workspace';
 import { MenuButton } from '../components/menu-button';
 import { navData as homeNavData } from '../nav-config-home';
 import { AccountDrawer } from '../components/account-drawer';
 import { homeLayoutVars, homeNavColorVars } from './css-vars';
-import { SettingsButton } from '../components/settings-button';
-import { LanguagePopover } from '../components/language-popover';
-import { ContactsPopover } from '../components/contacts-popover';
-import { WorkspacesPopover } from '../components/workspaces-popover';
 import { NotificationsDrawer } from '../components/notifications-drawer';
 import { MainSection, layoutClasses, HeaderSection, LayoutSection } from '../core';
 
@@ -37,13 +36,12 @@ import { MainSection, layoutClasses, HeaderSection, LayoutSection } from '../cor
 
 export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg' }) {
   const theme = useTheme();
-
-  const { user } = useMockedUser();
+  const pathname = usePathname();
+  const { user } = useAuthContext();
 
   const settings = useSettingsContext();
 
   const navVars = homeNavColorVars(theme, settings.state.navColor, settings.state.navLayout);
-
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
   const navData = slotProps?.nav?.data ?? homeNavData;
@@ -52,7 +50,41 @@ export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg
   const isNavHorizontal = settings.state.navLayout === 'horizontal';
   const isNavVertical = isNavMini || settings.state.navLayout === 'vertical';
 
-  const canDisplayItemByRole = (allowedRoles) => !allowedRoles?.includes(user?.role);
+  const userRole = user?.role ?? user?.dropshipping?.roleCode ?? null;
+
+  // 1) Aplana todos los items del menú (incluye children)
+  const allNavItems = useMemo(() => {
+    const out = [];
+    const collect = (items = []) => {
+      items.forEach((it) => {
+        out.push(it);
+        if (Array.isArray(it.children) && it.children.length) collect(it.children);
+      });
+    };
+    (navData || []).forEach((section) => collect(section.items || []));
+    return out;
+  }, [navData]);
+
+  // 2) Busca el item cuyo path coincide exactamente o es prefijo del pathname actual.
+  //    Elegimos el de path más largo (match más específico).
+  const currentAllowedRoles = useMemo(() => {
+    const norm = String(pathname || '').replace(/\/+$/, '');
+    const matches = allNavItems.filter((it) => {
+      const p = String(it.path || '').replace(/\/+$/, '');
+      if (!p) return false;
+      if (norm === p) return true;
+      return norm.startsWith(p.endsWith('/') ? p : `${p}/`);
+    });
+    const best = matches.sort((a, b) => (b.path?.length || 0) - (a.path?.length || 0))[0];
+    return best?.allowedRoles;
+  }, [allNavItems, pathname]);
+
+  // Esta función ya la consumen NavVertical/NavHorizontal/NavMobile para ocultar items
+  // Debe devolver true cuando el item debe ocultarse
+  const canDisplayItemByRole = (allowedRoles) => {
+    if (!Array.isArray(allowedRoles) || allowedRoles.length === 0) return false; // no ocultar
+    return !allowedRoles.includes(userRole); // true => ocultar
+  };
 
   const renderHeader = () => {
     const headerSlotProps = {
@@ -85,7 +117,6 @@ export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg
       ) : null,
       leftArea: (
         <>
-          {/** @slot Nav mobile */}
           <MenuButton
             onClick={onOpen}
             sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
@@ -98,7 +129,6 @@ export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg
             checkPermissions={canDisplayItemByRole}
           />
 
-          {/** @slot Logo */}
           {isNavHorizontal && (
             <Logo
               sx={{
@@ -108,44 +138,14 @@ export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg
             />
           )}
 
-          {/** @slot Divider */}
           {isNavHorizontal && (
             <VerticalDivider sx={{ [theme.breakpoints.up(layoutQuery)]: { display: 'flex' } }} />
           )}
-
-          {/** @slot Workspace popover */}
-          {/* <WorkspacesPopover
-            data={_workspaces}
-            sx={{ ...(isNavHorizontal && { color: 'var(--layout-nav-text-primary-color)' }) }}
-          /> */}
         </>
       ),
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
-          {/** @slot Searchbar */}
-          {/* <Searchbar data={navData} /> */}
-
-          {/* * @slot Language popover
-          <LanguagePopover
-            data={[
-              { value: 'en', label: 'English', countryCode: 'GB' },
-              { value: 'fr', label: 'French', countryCode: 'FR' },
-              { value: 'vi', label: 'Vietnamese', countryCode: 'VN' },
-              { value: 'cn', label: 'Chinese', countryCode: 'CN' },
-              { value: 'ar', label: 'Arabic', countryCode: 'SA' },
-            ]}
-          /> */}
-
-          {/** @slot Notifications popover */}
           <NotificationsDrawer data={_notifications} />
-
-
-          {/* <ContactsPopover data={_contacts} /> */}
-
-          {/** @slot Settings button */}
-          {/* <SettingsButton /> */}
-
-          {/** @slot Account drawer */}
           <AccountDrawer data={_account} />
         </Box>
       ),
@@ -179,27 +179,18 @@ export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg
     />
   );
 
-  const renderFooter = () => null;
-
-  const renderMain = () => <MainSection {...slotProps?.main}>{children}</MainSection>;
+  const renderMain = () => (
+    // Proteger el contenido por rol del item actual
+    <RoleBasedGuard hasContent currentRole={userRole} allowedRoles={currentAllowedRoles} sx={{ py: 6 }}>
+      <MainSection {...slotProps?.main}>{children}</MainSection>
+    </RoleBasedGuard>
+  );
 
   return (
     <LayoutSection
-      /** **************************************
-       * @Header
-       *************************************** */
       headerSection={renderHeader()}
-      /** **************************************
-       * @Sidebar
-       *************************************** */
       sidebarSection={isNavHorizontal ? null : renderSidebar()}
-      /** **************************************
-       * @Footer
-       *************************************** */
-      footerSection={renderFooter()}
-      /** **************************************
-       * @Styles
-       *************************************** */
+      footerSection={null}
       cssVars={{ ...homeLayoutVars(theme), ...navVars.layout, ...cssVars }}
       sx={[
         {

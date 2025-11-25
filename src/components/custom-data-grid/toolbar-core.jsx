@@ -60,15 +60,12 @@ export function ToolbarButtonBase({ sx, label, icon, showLabel = true, ...other 
 // ----------------------------------------------------------------------
 
 export function CustomToolbarColumnsButton({ showLabel }) {
-  const apiRef = useGridApiContext();
-  const label = apiRef.current.getLocaleText('toolbarColumns');
-
   return (
     <ColumnsPanelTrigger
       render={(props) => (
         <ToolbarButtonBase
           {...props}
-          label={String(label)}
+          label="Columnas"
           icon={<ViewColumnsIcon />}
           showLabel={showLabel}
         />
@@ -80,15 +77,12 @@ export function CustomToolbarColumnsButton({ showLabel }) {
 // ----------------------------------------------------------------------
 
 export function CustomToolbarFilterButton({ showLabel }) {
-  const apiRef = useGridApiContext();
-  const label = apiRef.current.getLocaleText('toolbarFilters');
-
   return (
     <FilterPanelTrigger
       render={(props, state) => (
         <ToolbarButtonBase
           {...props}
-          label={String(label)}
+          label="Filtros"
           showLabel={showLabel}
           icon={
             <Badge variant="dot" color="error" badgeContent={state.filterCount}>
@@ -104,11 +98,6 @@ export function CustomToolbarFilterButton({ showLabel }) {
 // ----------------------------------------------------------------------
 
 export function CustomToolbarExportButton({ showLabel }) {
-  const apiRef = useGridApiContext();
-  const label = apiRef.current.getLocaleText('toolbarExport');
-  const csvLabel = apiRef.current.getLocaleText('toolbarExportCSV');
-  const printLabel = apiRef.current.getLocaleText('toolbarExportPrint');
-
   const { open, anchorEl, onClose, onOpen } = usePopover();
 
   return (
@@ -119,7 +108,7 @@ export function CustomToolbarExportButton({ showLabel }) {
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={onOpen}
-        label={String(label)}
+        label="Exportar"
         icon={<ExportIcon />}
         showLabel={showLabel}
       />
@@ -138,11 +127,11 @@ export function CustomToolbarExportButton({ showLabel }) {
         }}
       >
         <ExportPrint render={<MenuItem />} onClick={onClose}>
-          {printLabel}
+          Imprimir
         </ExportPrint>
 
         <ExportCsv render={<MenuItem />} onClick={onClose}>
-          {csvLabel}
+          Descargar como CSV
         </ExportCsv>
       </Menu>
     </>
@@ -152,10 +141,6 @@ export function CustomToolbarExportButton({ showLabel }) {
 // ----------------------------------------------------------------------
 
 export function CustomToolbarQuickFilter({ sx, slotProps, ...other }) {
-  const apiRef = useGridApiContext();
-  const label = apiRef.current.getLocaleText('toolbarQuickFilterLabel');
-  const placeholder = apiRef.current.getLocaleText('toolbarQuickFilterPlaceholder');
-
   return (
     <QuickFilter
       {...other}
@@ -170,8 +155,8 @@ export function CustomToolbarQuickFilter({ sx, slotProps, ...other }) {
                 {...controlProps}
                 fullWidth
                 inputRef={ref}
-                aria-label={label}
-                placeholder={placeholder}
+                aria-label="Buscar"
+                placeholder="Buscar..."
                 slotProps={{
                   input: {
                     startAdornment: (

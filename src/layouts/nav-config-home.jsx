@@ -41,46 +41,35 @@ const ICONS = {
 // ----------------------------------------------------------------------
 
 export const navData = [
-  /**
-   * Overview
-   */
   {
     subheader: 'Overview',
-    items: [
-      { title: 'Inicio', path: paths.home.root, icon: ICONS.home },
-    ],
+    items: [{ title: 'Inicio', path: paths.home.root, icon: ICONS.home }],
   },
-  /**
-   * Management
-   */
   {
     subheader: 'Management',
     items: [
-      // {
-      //   title: 'Usuario',
-      //   path: paths.home.user.root,
-      //   icon: ICONS.user,
-      //   children: [
-      //     { title: 'Profile', path: paths.home.user.root },
-      //     { title: 'Sucursales', path: paths.home.warehouse.root },
-      //     { title: 'List', path: paths.home.user.list },
-      //     { title: 'Create', path: paths.home.user.new },
-      //     { title: 'Cuenta', path: paths.home.user.account, deepMatch: true },
-      //   ],
-      // },
-      // {
-      //   title: 'Tienda',
-      //   path: paths.home.store.root,
-      //   icon: ICONS.user,
-      // },
+      {
+        title: 'Tienda',
+        path: paths.home.store.root,
+        icon: ICONS.user,
+        allowedRoles: ['dropper'],
+      },
       {
         title: 'Mis Productos',
         path: paths.home.product.root,
         icon: ICONS.product,
         children: [
-          { title: 'Lista de productos', path: paths.home.product.root },
+          { title: 'Lista de productos', path: paths.home.product.list },
           { title: 'Nuevo Producto', path: paths.home.product.create },
           { title: 'Cargar Productos', path: paths.home.product.upload },
+        ],
+      },
+      {
+        title: 'Mis Ordenes',
+        path: paths.home.order.root,
+        icon: ICONS.order,
+        children: [
+          { title: 'Lista de ordenes', path: paths.home.order.root },
         ],
       },
       {
@@ -88,14 +77,11 @@ export const navData = [
         path: paths.home.warehouse.root,
         icon: ICONS.user,
       },
-      // {
-      //   title: 'Cuenta',
-      //   path: paths.home.account.root,
-      //   icon: ICONS.user,
-      //   children: [
-      //     { title: 'Profile', path: paths.home.account.root },
-      //   ],
-      // },
+      {
+        title: 'Inter Pay',
+        path: paths.home.banking.root,
+        icon: ICONS.banking,
+      }
     ],
   },
 ];

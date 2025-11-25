@@ -324,7 +324,6 @@ export function QuoterForm() {
           </Button>
         </Box>
 
-        {/* Prepago (segundo) - contiene la mini-burbujita Inter Pay */}
         <Box sx={{ position: 'relative', flex: 1 }}>
           <Button
             variant={paymentMode === 'recaudo' ? 'contained' : 'outlined'}
@@ -336,7 +335,6 @@ export function QuoterForm() {
             Prepago
           </Button>
 
-          {/* Mini burbuja ubicada en la esquina inferior derecha del botón "Prepago" */}
           <Box
             sx={(theme) => ({
               position: 'absolute',

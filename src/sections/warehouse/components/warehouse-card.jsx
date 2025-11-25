@@ -4,27 +4,27 @@ import { usePopover } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Link from '@mui/material/Link';
+import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
-import Link from '@mui/material/Link';
 
 import { RouterLink } from 'src/routes/components';
+
 import { Iconify } from 'src/components/iconify';
 import { CustomPopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export function WarehouseCard({ warehouse, onEdit, onDelete, sx, ...other }) {
+export function WarehouseCard({ warehouse, onToggleActive }) {
   const menuActions = usePopover();
 
   const {
-    id,
-    name = 'Bodega sin nombre',
+    name = 'Sucursal sin nombre',
     city = 'Ciudad no especificada',
     address = 'Dirección no registrada',
     contact_phone = '—',
@@ -38,28 +38,24 @@ export function WarehouseCard({ warehouse, onEdit, onDelete, sx, ...other }) {
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
-        {!!onEdit && (
+        {!!onToggleActive && (
           <MenuItem
             onClick={() => {
               menuActions.onClose();
-              onEdit?.(warehouse);
+              onToggleActive?.(warehouse);
+            }}
+            sx={{
+              color: warehouse.status === 'active' ? 'grey.600' : 'primary.main',
             }}
           >
-            <Iconify icon="solar:pen-bold" />
-            Editar
-          </MenuItem>
-        )}
-
-        {!!onDelete && (
-          <MenuItem
-            onClick={() => {
-              menuActions.onClose();
-              onDelete?.(warehouse);
-            }}
-            sx={{ color: 'error.main' }}
-          >
-            <Iconify icon="solar:trash-bin-trash-bold" />
-            Eliminar
+            <Iconify
+              icon={
+                warehouse.status === 'active'
+                  ? 'solar:close-circle-bold'
+                  : 'solar:check-circle-bold'
+              }
+            />
+            {warehouse.status === 'active' ? 'Inhabilitar' : 'Habilitar'}
           </MenuItem>
         )}
       </MenuList>
@@ -68,8 +64,7 @@ export function WarehouseCard({ warehouse, onEdit, onDelete, sx, ...other }) {
 
   return (
     <>
-      <Card sx={{ position: 'relative', p: 3, ...sx }} {...other}>
-        {/* Botón de menú (acciones) */}
+      <Card sx={{ position: 'relative', p: 3 }} >
         <IconButton
           onClick={menuActions.onOpen}
           sx={{ position: 'absolute', top: 8, right: 8 }}
@@ -84,7 +79,7 @@ export function WarehouseCard({ warehouse, onEdit, onDelete, sx, ...other }) {
             sx={{
               width: 48,
               height: 48,
-              bgcolor: 'primary.main',
+              bgcolor: warehouse.status === 'active' ? 'primary.main' : 'grey.400',
               color: 'white',
               fontSize: 20,
             }}
@@ -118,7 +113,6 @@ export function WarehouseCard({ warehouse, onEdit, onDelete, sx, ...other }) {
 
         <Divider sx={{ borderStyle: 'dashed', mb: 2 }} />
 
-        {/* Detalles */}
         <Box sx={{ display: 'grid', rowGap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Iconify width={18} icon="solar:map-point-bold" />

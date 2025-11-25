@@ -1,11 +1,11 @@
 import { CONFIG } from 'src/global-config';
 
-import { WarehouseCardsView } from 'src/sections/user/view';
+import { WarehouseListView } from 'src/sections/warehouse/view';
 
 // ----------------------------------------------------------------------
 
-export const metadata = { title: `Home | Warehouses - ${CONFIG.appName}` };
+export const metadata = { title: `Warehouses - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <WarehouseCardsView />;
+  return <WarehouseListView />;
 }

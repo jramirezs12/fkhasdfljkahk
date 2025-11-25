@@ -106,7 +106,7 @@ export function ProductDetailsCarousel({ images }) {
         index={lightbox.selected}
         slides={slides}
         open={lightbox.open}
-        onClose={lightbox.onClose}
+        close={lightbox.onClose}
         onGetCurrentIndex={(index) => lightbox.setSelected(index)}
       />
     </>

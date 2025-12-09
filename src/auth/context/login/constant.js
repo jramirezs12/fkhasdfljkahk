@@ -1,3 +1,1 @@
-// ----------------------------------------------------------------------
-
-export const STORAGE_KEY = 'access_token';
+export const STORAGE_KEY = 'storage_x9';

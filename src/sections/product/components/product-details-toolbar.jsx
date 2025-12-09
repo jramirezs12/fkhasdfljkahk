@@ -46,7 +46,7 @@ export function ProductDetailsToolbar({
   if (isProvider) {
     computedBackHref = paths.home.product.list;
   } else if (isDropper) {
-    computedBackHref = paths.home.product.root;
+    computedBackHref = paths.home.store.root;
   } else {
     computedBackHref = backHref ?? paths.home.root;
   }

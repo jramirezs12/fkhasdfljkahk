@@ -9,13 +9,12 @@ import { _addressBooks } from 'src/_mock';
 import { Iconify } from 'src/components/iconify';
 
 import { useCheckoutContext } from '../context';
-import { CheckoutSummary } from '../checkout-summary';
 import { AddressItem, AddressCreateForm } from '../../address';
 
 // ----------------------------------------------------------------------
 
 export function CheckoutBillingAddress() {
-  const { onChangeStep, onCreateBillingAddress, state: checkoutState } = useCheckoutContext();
+  const { onChangeStep, onCreateBillingAddress } = useCheckoutContext();
 
   const addressForm = useBoolean();
 
@@ -78,9 +77,6 @@ export function CheckoutBillingAddress() {
           </Box>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
-          <CheckoutSummary checkoutState={checkoutState} />
-        </Grid>
       </Grid>
 
       <AddressCreateForm

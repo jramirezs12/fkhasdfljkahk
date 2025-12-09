@@ -3,11 +3,11 @@
 import { headers } from 'next/headers';
 import { GraphQLClient } from 'graphql-request';
 
-import { GET_PROVIDER_PRODUCTS } from './queries';
-import { GET_WAREHOUSES_QUERY } from '../warehouses/queries';
+import { GET_WAREHOUSES_QUERY } from 'src/hooks/warehouse/queries';
 
-// small utils
-function unique(arr = []) { return Array.from(new Set((arr || []).filter(Boolean))); }
+import { unique, adaptItem } from './adapters';
+import { GET_PROVIDER_PRODUCTS } from './queries';
+
 function resolveGraphqlUrlSSR() {
   let endpoint =
     process.env.NEXT_PUBLIC_ALCARRITO_GRAPHQL_URL ||
@@ -27,51 +27,6 @@ function resolveGraphqlUrlSSR() {
     throw new Error(`Endpoint GraphQL inválido: "${endpoint}".`);
   }
   return endpoint;
-}
-
-function adaptItem(item) {
-  const minPrice = item?.price_range?.minimum_price;
-  const price = (minPrice?.final_price?.value ?? minPrice?.regular_price?.value) ?? 0;
-  const cover = item?.image?.url ?? (Array.isArray(item?.media_gallery) && item.media_gallery[0]?.url) ?? null;
-  const available = Number(item?.stock_saleable ?? 0);
-  const sku = item?.sku ?? '';
-  const uid = item?.uid ?? '';
-  const id = sku || uid || String(item?.id ?? '');
-
-  const provider = item?.provider ?? null;
-
-  // extract warehouseId
-  let warehouseId = null;
-  try {
-    const wp = provider?.warehouse_product ?? item?.provider?.warehouse_product ?? null;
-    if (Array.isArray(wp) && wp.length > 0) {
-      warehouseId = wp[0]?.warehouse_id ?? null;
-    } else if (wp && typeof wp === 'object') {
-      warehouseId = wp.warehouse_id ?? null;
-    }
-    if (warehouseId !== null && warehouseId !== undefined) warehouseId = String(warehouseId);
-    else warehouseId = null;
-  } catch (err) {
-    warehouseId = null;
-  }
-
-  return {
-    id,
-    uid,
-    sku,
-    name: item?.name ?? '',
-    coverUrl: cover,
-    price,
-    priceSale: null,
-    available,
-    inventoryType: available > 0 ? 'in stock' : 'out of stock',
-    createdAt: item?.createdAt ?? null,
-    categories: item?.categories ?? [],
-    media_gallery: item?.media_gallery ?? [],
-    provider,
-    warehouseId,
-    warehouseCity: null,
-  };
 }
 
 export async function getProviderProducts(providerId, { currentPage = 1, pageSize = 24 } = {}) {

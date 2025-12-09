@@ -16,7 +16,6 @@ import { fShortenNumber } from 'src/utils/format-number';
 import { AvatarShape } from 'src/assets/illustrations';
 
 import { Image } from 'src/components/image';
-import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 

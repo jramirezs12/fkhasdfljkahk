@@ -1,7 +1,6 @@
 'use client';
 
-import useSWR from 'swr';
-import { useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { useRouter } from 'next/navigation';
 import { useBoolean } from 'minimal-shared/hooks';
 import { useMemo, useState, useEffect, useCallback } from 'react';
@@ -23,6 +22,7 @@ import { fetchWishlists, removeProductsFromWishlist, deleteWishlist as apiDelete
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
+import { ErrorContent } from 'src/components/error-content';
 import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
@@ -115,7 +115,7 @@ export default function WishlistDetailsView({ wishlistId }) {
 
   const dataFiltered = useMemo(() => {
     let input = tableData;
-    const { stock, publish } = filters;
+    const { stock } = filters;
     if (Array.isArray(stock) && stock.length) {
       input = input.filter((r) => stock.includes(r.inventoryType));
     }
@@ -185,9 +185,7 @@ export default function WishlistDetailsView({ wishlistId }) {
     } catch (err) {
       console.error(err);
       const msg = err?.response?.errors?.[0]?.message || err?.message || 'Error eliminando la lista';
-      // Show GraphQL message (e.g. default wishlist can't be deleted)
       toast.error(msg);
-      // don't navigate away
     } finally {
       setDeletingWishlist(false);
     }
@@ -325,6 +323,7 @@ export default function WishlistDetailsView({ wishlistId }) {
     [handleDeleteRow, theme.vars.palette.error.main]
   );
 
+  // ----- Error / Loading / NotFound handling -----
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
@@ -333,6 +332,39 @@ export default function WishlistDetailsView({ wishlistId }) {
     );
   }
 
+  // Show spinner while SWR is still loading initial data (lists === null)
+  if (isValidating && lists === null) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // If lists have loaded but the specific wishlistId was not found -> show Not Found screen
+  if (Array.isArray(lists) && !wishlist) {
+    return (
+      <HomeContent maxWidth={false} sx={{ pt: 5 }}>
+        <ErrorContent
+          filled
+          title="Lista no encontrada!"
+          action={
+            <Button
+              component={RouterLink}
+              href={paths.home.product.list}
+              startIcon={<Iconify width={16} icon="eva:arrow-ios-back-fill" />}
+              sx={{ mt: 3 }}
+            >
+              Volver a la lista
+            </Button>
+          }
+          sx={{ py: 10, height: 'auto', flexGrow: 'unset' }}
+        />
+      </HomeContent>
+    );
+  }
+
+  // If lists are still null (should be covered above) or wishlist null, show spinner as fallback
   if (lists === null || wishlist === null) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
@@ -341,6 +373,7 @@ export default function WishlistDetailsView({ wishlistId }) {
     );
   }
 
+  // ----- Main render (wishlist exists) -----
   return (
     <>
       <HomeContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -415,7 +448,7 @@ export default function WishlistDetailsView({ wishlistId }) {
           event.stopPropagation();
         }
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
   }}
@@ -435,7 +468,7 @@ export default function WishlistDetailsView({ wishlistId }) {
           event.stopPropagation();
         }
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
   }}
@@ -458,7 +491,7 @@ export default function WishlistDetailsView({ wishlistId }) {
           return;
         }
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
     // otherwise allow row click behavior (if any)

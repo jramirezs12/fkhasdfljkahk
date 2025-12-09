@@ -2,58 +2,102 @@
 
 import graphqlClient from 'src/lib/graphqlClient';
 
-import { GET_WISHLISTS } from './queries';
+import {
+  GET_WISHLISTS
+} from './queries';
 import {
   CREATE_WISHLIST,
   DELETE_WISHLIST,
   UPDATE_WISHLIST,
   ADD_PRODUCTS_TO_WISHLIST,
   REMOVE_PRODUCTS_FROM_WISHLIST,
-} from './mutations';
+} from './mutations'; // queries.js contains both queries & mutations in your snapshot
 
+function formatGraphqlError(prefix, err) {
+  const graphErrors = err?.response?.errors;
+  const firstMsg = graphErrors?.[0]?.message || err?.message || 'Error desconocido';
+  return { ok: false, error: `${prefix}: ${firstMsg}`, raw: { status: err?.response?.status, errors: graphErrors } };
+}
+
+/**
+ * Funciones de bajo nivel que llaman al cliente GraphQL y lanzan / devuelven errores normalizados.
+ * Estas se usan desde los hooks React Query.
+ */
 
 export async function fetchWishlists() {
-  const res = await graphqlClient.request(GET_WISHLISTS);
-  return res?.customer?.wishlists ?? [];
+  try {
+    const res = await graphqlClient.request(GET_WISHLISTS);
+    const items = res?.customer?.wishlists ?? [];
+    return items;
+  } catch (err) {
+    // Si hay partial data, devolverla; si no, propagar como Error
+    const partial = err?.response?.data?.customer?.wishlists;
+    if (partial) return partial;
+    throw new Error(formatGraphqlError('Error cargando wishlists', err).error);
+  }
 }
 
 export async function createWishlist({ name, visibility = 'PRIVATE' }) {
-  const variables = { name, visibility };
-  const res = await graphqlClient.request(CREATE_WISHLIST, variables);
-  return res?.createWishlist?.wishlist ?? null;
+  try {
+    const res = await graphqlClient.request(CREATE_WISHLIST, { name, visibility });
+    const wl = res?.createWishlist?.wishlist ?? null;
+    if (!wl) throw new Error('No se creó la wishlist');
+    return wl;
+  } catch (err) {
+    throw new Error(formatGraphqlError('Error creando wishlist', err).error);
+  }
 }
 
 export async function deleteWishlist({ wishlistId }) {
-  const res = await graphqlClient.request(DELETE_WISHLIST, { wishlistId });
-  return res?.deleteWishlist ?? null;
-}
-
-export async function removeProductsFromWishlist({ wishlistId, wishlistItemsIds = [] }) {
-  const res = await graphqlClient.request(REMOVE_PRODUCTS_FROM_WISHLIST, {
-    wishlistId,
-    wishlistItemsIds,
-  });
-  return res?.removeProductsFromWishlist?.wishlist ?? null;
+  try {
+    const res = await graphqlClient.request(DELETE_WISHLIST, { wishlistId });
+    return res?.deleteWishlist ?? null;
+  } catch (err) {
+    throw new Error(formatGraphqlError('Error eliminando wishlist', err).error);
+  }
 }
 
 export async function updateWishlist({ wishlistId, name, visibility }) {
-  const res = await graphqlClient.request(UPDATE_WISHLIST, { wishlistId, name, visibility });
-  return res?.updateWishlist ?? null;
+  try {
+    const res = await graphqlClient.request(UPDATE_WISHLIST, { wishlistId, name, visibility });
+    return res?.updateWishlist ?? null;
+  } catch (err) {
+    throw new Error(formatGraphqlError('Error actualizando wishlist', err).error);
+  }
 }
 
 export async function addProductsToWishlist({ wishlistId, items = [] }) {
   if (!wishlistId) throw new Error('wishlistId es requerido');
-  if (!Array.isArray(items) || items.length === 0) {
-    throw new Error('No hay items para agregar');
-  }
+  if (!Array.isArray(items) || items.length === 0) throw new Error('No hay items para agregar');
+
   const wishlistItems = items.map((it) => ({ sku: it.sku, quantity: Number(it.quantity || 1) }));
-  const res = await graphqlClient.request(ADD_PRODUCTS_TO_WISHLIST, {
-    wishlistId,
-    wishlistItems,
-  });
-  return res?.addProductsToWishlist?.wishlist ?? null;
+
+  try {
+    const res = await graphqlClient.request(ADD_PRODUCTS_TO_WISHLIST, { wishlistId, wishlistItems });
+    const wl = res?.addProductsToWishlist?.wishlist ?? null;
+    if (!wl) throw new Error('No se pudo agregar productos a la wishlist');
+    return wl;
+  } catch (err) {
+    throw new Error(formatGraphqlError('Error agregando productos a wishlist', err).error);
+  }
 }
 
+export async function removeProductsFromWishlist({ wishlistId, wishlistItemsIds = [] }) {
+  if (!wishlistId) throw new Error('wishlistId es requerido');
+  try {
+    const res = await graphqlClient.request(REMOVE_PRODUCTS_FROM_WISHLIST, { wishlistId, wishlistItemsIds });
+    const wl = res?.removeProductsFromWishlist?.wishlist ?? null;
+    if (!wl) throw new Error('No se pudo remover productos de la wishlist');
+    return wl;
+  } catch (err) {
+    throw new Error(formatGraphqlError('Error removiendo productos de wishlist', err).error);
+  }
+}
+
+/**
+ * addProductsToWishlists: paralelo sobre múltiples wishlistIds
+ * - Retorna array de resultados (o lanza si alguna promesa falla).
+ */
 export async function addProductsToWishlists({ wishlistIds = [], items = [] }) {
   if (!Array.isArray(wishlistIds) || wishlistIds.length === 0) {
     throw new Error('wishlistIds es requerido');
@@ -62,12 +106,10 @@ export async function addProductsToWishlists({ wishlistIds = [], items = [] }) {
     throw new Error('items es requerido');
   }
 
-  // Ejecutar paralelamente una llamada por wishlistId
   const promises = wishlistIds.map((wid) =>
     addProductsToWishlist({ wishlistId: wid, items })
   );
 
-  // Promise.all para lanzar todas; retornamos array de resultados
   const results = await Promise.all(promises);
-  return results; // array de wishlist responses
+  return results;
 }

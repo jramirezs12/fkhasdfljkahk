@@ -125,6 +125,8 @@ export function PhoneInput({
       ...(isCountryLocked ? { country: activeCountry } : { defaultCountry: activeCountry }),
     };
 
+    // 'other' may include props for PhoneNumberInput (like forceCallingCode, onlyCountries, disableDropdown) —
+    // CustomInput will strip unsupported DOM props before forwarding to MUI TextField.
     return <PhoneNumberInput {...textFieldProps} {...phoneInputProps} {...other} />;
   };
 
@@ -157,9 +159,18 @@ export function PhoneInput({
 }
 
 // ----------------------------------------------------------------------
+// CustomInput: strip props that would otherwise flow to DOM (forceCallingCode, onlyCountries, disableDropdown, country, defaultCountry, etc.)
+// Accept both inputRef and ref for compatibility.
+function CustomInput(props) {
+  const {
+    inputRef: inputRefProp,
+    ref: refProp,
+    // any other custom props to strip can be added here
+    ...rest
+  } = props;
 
-function CustomInput({ ref, ...other }) {
-  return <TextField inputRef={ref} {...other} />;
+  const inputRef = inputRefProp ?? refProp;
+  return <TextField inputRef={inputRef} {...rest} />;
 }
 
 // ----------------------------------------------------------------------

@@ -33,13 +33,22 @@ export function ProductSearch({ redirectPath, sx }) {
   const { options, loading } = useSearchData(debouncedQuery, products);
 
   const handleChange = useCallback(
-    (item) => {
-      setSelectedItem(item);
+    (_event, item) => {
+      setSelectedItem(item || null);
       if (item) {
-        router.push(redirectPath(item.id));
+        const id = item?.id ?? item?.sku ?? '';
+        if (id) router.push(redirectPath(id));
       }
     },
     [redirectPath, router]
+  );
+
+  const handleInputChange = useCallback(
+    (_event, value) => {
+      // Aseguramos que siempre sea string
+      setSearchQuery(String(value ?? '').trim());
+    },
+    []
   );
 
   const paperStyles = {
@@ -63,11 +72,11 @@ export function ProductSearch({ redirectPath, sx }) {
       loading={loading}
       options={options}
       value={selectedItem}
-      onChange={( newValue) => handleChange(newValue)}
-      onInputChange={( newValue) => setSearchQuery(newValue)}
-      getOptionLabel={(option) => option.name}
+      onChange={handleChange}
+      onInputChange={handleInputChange}
+      getOptionLabel={(option) => String(option?.name ?? option?.sku ?? '')}
       noOptionsText={<SearchNotFound query={debouncedQuery} />}
-      isOptionEqualToValue={(option, value) => option.id === value.id}
+      isOptionEqualToValue={(option, value) => (option?.id ?? option?.sku) === (value?.id ?? value?.sku)}
       slotProps={{ paper: { sx: paperStyles } }}
       sx={[{ width: { xs: 1, sm: 260 } }, ...(Array.isArray(sx) ? sx : [sx])]}
       renderInput={(params) => (
@@ -94,14 +103,15 @@ export function ProductSearch({ redirectPath, sx }) {
       )}
       renderOption={(props, option, state) => {
         const { key, ...otherProps } = props;
-        const matches = match(option.name, state.inputValue, { insideWords: true });
-        const parts = parse(option.name, matches);
+        const displayName = String(option?.name ?? option?.sku ?? '');
+        const matches = match(displayName, state.inputValue ?? '', { insideWords: true });
+        const parts = parse(displayName, matches);
 
         return (
           <li key={key} {...otherProps}>
             <Link
               component={RouterLink}
-              href={redirectPath(option.id)}
+              href={redirectPath(option?.id ?? option?.sku ?? '')}
               color="inherit"
               underline="none"
             >
@@ -139,15 +149,16 @@ function useSearchData(searchQuery, products) {
     setLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 300));
-      const q = (searchQuery || '').toLowerCase();
+      const q = String(searchQuery ?? '').toLowerCase();
       const results = q
         ? dataset.filter(({ name, sku }) =>
-            [name, sku].some((field) => field?.toLowerCase().includes(q))
+            [name, sku].some((field) => String(field ?? '').toLowerCase().includes(q))
           )
         : [];
       setOptions(results.slice(0, 20));
     } catch (error) {
-      console.error(error);
+      console.error('[ProductSearch] fetch error:', error);
+      setOptions([]);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,5 @@
 'use client';
 
-import { m } from 'framer-motion';
 import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
@@ -8,15 +7,10 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 
-import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
 import { CONFIG } from 'src/global-config';
 
-import { Label } from 'src/components/label';
-
-import { useMockedUser } from 'src/auth/hooks';
-// Preferimos el hook real de autenticación; fallback al mocked user para desarrollo
 import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
@@ -25,12 +19,7 @@ export function NavUpgrade({ sx, ...other }) {
   const auth = useAuthContext();
   const storeUser = auth?.user ?? null;
 
-  // Fallback a mocked user sólo si no existe usuario real
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const mocked = useMockedUser ? useMockedUser() : null;
-  const mockedUser = mocked?.user ?? null;
-
-  const user = storeUser ?? mockedUser ?? null;
+  const user = storeUser ?? null;
 
   const displayName = user?.displayName || user?.name || user?.firstName || 'Usuario';
   const email = user?.email ?? '';

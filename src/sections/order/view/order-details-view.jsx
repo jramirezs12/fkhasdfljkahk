@@ -20,6 +20,8 @@ import { OrderDetailsShipping } from '../components/order-details-shipping';
 
 export function OrderDetailsView({ order }) {
 
+  console.log('Order details', order);
+
   return (
     <HomeContent>
       <OrderDetailsToolbar
@@ -27,6 +29,7 @@ export function OrderDetailsView({ order }) {
         createdAt={order?.createdAt}
         orderNumber={order?.orderNumber}
         backHref={paths.home.order.root}
+        orderUid={order?.uid}
       />
 
       <Grid container spacing={3}>

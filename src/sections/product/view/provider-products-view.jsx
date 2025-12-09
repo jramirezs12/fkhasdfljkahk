@@ -1,7 +1,7 @@
 'use client';
 
 import useSWR from 'swr';
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -16,6 +16,9 @@ import { RouterLink } from 'src/routes/components';
 import { HomeContent } from 'src/layouts/home';
 import graphqlClient from 'src/lib/graphqlClient';
 import { fetchProviderProducts } from 'src/actions/product/provider';
+
+import { EmptyContent } from 'src/components/empty-content';
+import { LoadingScreen } from 'src/components/loading-screen';
 
 import { ME_QUERY } from 'src/auth/context/login/queries';
 
@@ -158,9 +161,6 @@ export default function ProviderProductsView({ pageSize = 12 }) {
   const totalCount = productsData?.total_count ?? 0;
   const totalPages = productsData?.page_info?.total_pages ?? 1;
 
-  // Si quieres revisar en dev: uncomment the next line
-  // console.debug('[ProviderProductsView] productsData @render:', productsData);
-
   const handleChangePage = (_, newPage) => setPage(newPage);
 
   return (
@@ -174,42 +174,39 @@ export default function ProviderProductsView({ pageSize = 12 }) {
         </Box>
 
         <Stack direction="row" spacing={1}>
-          <Button component={RouterLink} href={paths.home.product.list} variant="outlined">
-            Volver a mis listas
+          <Button component={RouterLink} href={paths.home.product.create} size="medium" variant="contained">
+            Crear producto
           </Button>
         </Stack>
       </Stack>
 
-      <Box
-        sx={{
-          gap: 3,
-          display: 'grid',
-          gridTemplateColumns: { xs: 'repeat(1,1fr)', sm: 'repeat(2,1fr)', md: 'repeat(3,1fr)', lg: 'repeat(4,1fr)' },
-        }}
-      >
-        {productsLoading && items.length === 0 ? (
-          Array.from({ length: pageSize }).map((_, idx) => (
-            <Box key={idx} sx={{ height: 220, borderRadius: 2, bgcolor: 'background.paper' }} />
-          ))
-        ) : items.length === 0 ? (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              No tienes productos publicados.
-            </Typography>
 
-            <Box sx={{ mt: 2, typography: 'caption', color: 'text.secondary', whiteSpace: 'pre-wrap' }}>
-              Raw productsData: {typeof productsData === 'object' ? JSON.stringify(productsData, null, 2) : String(productsData)}
-            </Box>
-          </Box>
-        ) : (
-          items.map((it) => (
+      {productsLoading ? (
+        <LoadingScreen />
+      ) : items.length === 0 ? (
+        <EmptyContent
+          filled
+          title="No se encontraron productos"
+          description="No tienes productos publicados. ¡Crea un producto para empezar a vender!"
+          sx={{ py: 10, height: 'auto', flexGrow: 'unset' }}
+        />
+      ) : (
+        <Box
+          sx={{
+            gap: 3,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(1,1fr)', sm: 'repeat(2,1fr)', md: 'repeat(3,1fr)', lg: 'repeat(4,1fr)' },
+          }}
+        >
+          {items.map((it) => (
             <ProviderProductCard
               key={it?.sku ?? it?.id ?? JSON.stringify(it)}
               product={it}
             />
-          ))
-        )}
-      </Box>
+          ))}
+        </Box>
+      )}
+
 
       {totalCount > pageSize && (
         <Pagination

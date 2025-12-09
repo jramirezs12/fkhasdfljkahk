@@ -56,26 +56,45 @@ export const navData = [
       },
       {
         title: 'Mis Productos',
-        path: paths.home.product.root,
+        path: paths.home.store.root,
         icon: ICONS.product,
         children: [
-          { title: 'Lista de productos', path: paths.home.product.list },
-          { title: 'Nuevo Producto', path: paths.home.product.create },
-          { title: 'Cargar Productos', path: paths.home.product.upload },
+          {
+            title: 'Lista de productos',
+            path: paths.home.product.list,
+            allowedRoles: ['provider', 'dropper'],
+          },
+          {
+            title: 'Nuevo Producto',
+            path: paths.home.product.create,
+            allowedRoles: ['provider'],
+          },
+          {
+            title: 'Cargar Productos',
+            path: paths.home.product.upload,
+            allowedRoles: ['provider'],
+          },
         ],
+        allowedRoles: ['provider', 'dropper'],
       },
       {
         title: 'Mis Ordenes',
         path: paths.home.order.root,
         icon: ICONS.order,
         children: [
-          { title: 'Lista de ordenes', path: paths.home.order.root },
+          {
+            title: 'Lista de ordenes',
+            path: paths.home.order.root,
+            allowedRoles: ['provider', 'dropper'],
+          },
         ],
+        allowedRoles: ['provider', 'dropper'],
       },
       {
         title: 'Sucursales',
         path: paths.home.warehouse.root,
         icon: ICONS.user,
+        allowedRoles: ['provider'],
       },
       {
         title: 'Inter Pay',

@@ -1,18 +1,19 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { useState, useCallback } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
+import { useState, useEffect, useCallback } from 'react';
 
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Badge from '@mui/material/Badge';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+
+import { useNotificationsStore } from 'src/store/notificationsStore';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -21,17 +22,9 @@ import { varTap, varHover, transitionTap } from 'src/components/animate';
 
 import { NotificationItem } from './notification-item';
 
-// ----------------------------------------------------------------------
+export function NotificationsDrawer({ sx, ...other }) {
+  const data = useNotificationsStore((state) => state.notifications);
 
-const TABS = [
-  { value: 'all', label: 'All', count: 22 },
-  { value: 'unread', label: 'Unread', count: 12 },
-  { value: 'archived', label: 'Archived', count: 10 },
-];
-
-// ----------------------------------------------------------------------
-
-export function NotificationsDrawer({ data = [], sx, ...other }) {
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
   const [currentTab, setCurrentTab] = useState('all');
@@ -41,11 +34,17 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
   }, []);
 
   const [notifications, setNotifications] = useState(data);
+  useEffect(() => {
+    setNotifications(data);
+  }, [data]);
 
   const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
 
+  const notificationsStore = useNotificationsStore();
   const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map((notification) => ({ ...notification, isUnRead: false })));
+    const updated = notifications.map((notification) => ({ ...notification, isUnRead: false }));
+    notificationsStore.setNotifications(updated);
+    setNotifications(updated);
   };
 
   const renderHead = () => (
@@ -60,7 +59,7 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
       }}
     >
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
-        Notifications
+        Notificaciones
       </Typography>
 
       {!!totalUnRead && (
@@ -83,26 +82,34 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
 
   const renderTabs = () => (
     <Tabs variant="fullWidth" value={currentTab} onChange={handleChangeTab} indicatorColor="custom">
-      {TABS.map((tab) => (
-        <Tab
-          key={tab.value}
-          iconPosition="end"
-          value={tab.value}
-          label={tab.label}
-          icon={
-            <Label
-              variant={((tab.value === 'all' || tab.value === currentTab) && 'filled') || 'soft'}
-              color={
-                (tab.value === 'unread' && 'info') ||
-                (tab.value === 'archived' && 'success') ||
-                'default'
-              }
-            >
-              {tab.count}
-            </Label>
-          }
-        />
-      ))}
+      <Tab
+        key="all"
+        iconPosition="end"
+        value="all"
+        label="Todas"
+        icon={
+          <Label
+            variant='filled'
+            color='default'
+          >
+            {notifications.length}
+          </Label>
+        }
+      />
+      <Tab
+        key="unread"
+        iconPosition="end"
+        value="unread"
+        label="Sin leer"
+        icon={
+          <Label
+            variant='soft'
+            color='info'
+          >
+            {notifications.filter((item) => item.isUnRead === true).length}
+          </Label>
+        }
+      />
     </Tabs>
   );
 
@@ -148,11 +155,6 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
         {renderTabs()}
         {renderList()}
 
-        <Box sx={{ p: 1 }}>
-          <Button fullWidth size="large">
-            View all
-          </Button>
-        </Box>
       </Drawer>
     </>
   );

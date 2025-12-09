@@ -1,3 +1,5 @@
+import { CONFIG } from 'src/global-config';
+
 export function adaptOrder(data) {
     if (!data || !data.items) {
         console.warn("No encuentra información de la orden:", data);
@@ -15,6 +17,7 @@ export function adaptOrder(data) {
                 return 0;
             }
         })(),
+        uid: order.id,
         orderNumber: order.order_number,
         createdAt: order.created_at,
         taxes: order.total.taxes.reduce((acc, tax) => acc + tax.amount.value, 0),
@@ -28,7 +31,7 @@ export function adaptOrder(data) {
                     return 0;
                 }
             })(),
-            coverUrl: prod.product.thumbnail.url,
+            coverUrl: (prod.product) ? prod.product.thumbnail.url : CONFIG.assetsDir + '/assets/images/img-not-found.jpg',
             name: prod.product_name,
             sku: prod.product_sku,
             quantity: prod.quantity_ordered,

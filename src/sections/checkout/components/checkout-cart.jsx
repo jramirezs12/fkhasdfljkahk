@@ -89,7 +89,7 @@ export function CheckoutCart() {
 
         <Button
           component={RouterLink}
-          href={paths.product.root}
+          href={paths.home.store.root}
           color="inherit"
           startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
         >

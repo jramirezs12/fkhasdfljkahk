@@ -39,7 +39,7 @@ export function ProductDetailsView({ product }) {
   return (
     <HomeContent>
       <ProductDetailsToolbar
-        backHref={paths.home.product.root}
+        backHref={paths.home.store.root}
         liveHref={paths.product.details(`${product?.id}`)}
         publish={publish}
         onChangePublish={handleChangePublish}

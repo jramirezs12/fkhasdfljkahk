@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { removeLastSlash } from 'minimal-shared/utils';
 
 import Tab from '@mui/material/Tab';

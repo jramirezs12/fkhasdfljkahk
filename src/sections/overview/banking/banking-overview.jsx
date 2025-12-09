@@ -12,7 +12,6 @@ import { fPercent, fCurrency } from 'src/utils/format-number';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
-import { Chart, useChart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
 
@@ -37,18 +36,6 @@ export function BankingOverview({ sx, ...other }) {
   const theme = useTheme();
 
   const tabs = useTabs('ingresos');
-
-  const chartColors =
-    tabs.value === 'ingresos' ? [theme.palette.primary.dark] : [theme.palette.warning.dark];
-
-  const chartOptions = useChart({
-    colors: chartColors,
-    xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'] },
-    stroke: { width: 3 },
-    tooltip: {
-      y: { formatter: (value) => fCurrency(value), title: { formatter: () => '' } },
-    },
-  });
 
   const renderBalance = () => (
     <Box sx={{ flexGrow: 1 }}>

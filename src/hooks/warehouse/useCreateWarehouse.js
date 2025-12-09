@@ -1,24 +1,37 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { useRouter } from 'src/routes/hooks';
+import { useWarehousesStore } from 'src/store/warehousesStore';
 
-import { createWarehouse } from '../../actions/warehouses/createWarehouse';
+import createWarehouseFn from './createWarehouse';
 
-export function useCreateWarehouse() {
-    const router = useRouter();
+/**
+ * Hook useCreateWarehouse - returns react-query mutation
+ * - onSuccess invalidates warehouses list and updates zustand store
+ */
+export function useCreateWarehouse(options = {}) {
+  const qc = useQueryClient();
+  const setWarehouse = useWarehousesStore((s) => s.setWarehouse);
 
-    return useMutation({
-        mutationFn: createWarehouse,
-        onSuccess: async () => {
-            router.replace('/home/warehouse');
-            router.refresh();
-        },
-        onError: (error) => {
-            console.error(error);
-        }
-    });
-};
+  return useMutation({
+    mutationKey: ['warehouse', 'create'],
+    mutationFn: (payload) => createWarehouseFn(payload),
+    onSuccess: async (created) => {
+      try {
+        // set in local store for instant UI
+        setWarehouse(created);
+      } catch { /* empty */ }
+      // invalidate query so list refetches
+      await qc.invalidateQueries({ queryKey: ['warehouses'] });
+      if (typeof options.onSuccess === 'function') options.onSuccess(created);
+    },
+    onError: (err) => {
+      if (typeof options.onError === 'function') options.onError(err);
+      console.error('useCreateWarehouse error:', err);
+    },
+    ...options,
+  });
+}
 
 export default useCreateWarehouse;

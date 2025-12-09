@@ -1,3 +1,7 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 import { CONFIG } from 'src/global-config';
 import { getProduct } from 'src/actions/product/product-ssr';
 
@@ -6,21 +10,20 @@ import { ProductDetailsView } from 'src/sections/product/view';
 export const metadata = { title: `Product details | Home - ${CONFIG.appName}` };
 
 export default async function Page({ params }) {
-  const { id } = await params;
+  const resolvedParams = await Promise.resolve(params);
+  const { id } = resolvedParams;
 
-  let productData;
-  try {
-    productData = await getProduct(id);
-  } catch (err) {
-    console.error('[Page getProduct] Error:', err);
+  // Obtén producto (función SSR sin server action)
+  const { product, error } = await getProduct(id);
+
+  if (error) {
+    // Fallback simple (evita romper el árbol de Server Components)
     return (
-      <div style={{ padding: 24 }}>
-        Error cargando el producto.
+      <div style={{ padding: 24, fontFamily: 'sans-serif' }}>
+        <strong>Error:</strong> {error.message}
       </div>
     );
   }
-
-  const { product } = productData || {};
 
   if (!product) {
     return <div style={{ padding: 24 }}>Producto no encontrado.</div>;
@@ -29,7 +32,6 @@ export default async function Page({ params }) {
   return <ProductDetailsView product={product} />;
 }
 
-export async function generateStaticParams() {
-  // Mantén vacío si no haces pre-render estático de múltiples SKUs
-  return [];
-}
+// Elimina generateStaticParams si NO prerenderas SKUs
+// Si en algún momento necesitas prerender estático, vuelve a definirlo con la lista de ids.
+// generateStaticParams() removido para forzar totalmente dinámico.

@@ -23,6 +23,8 @@ import { Label } from 'src/components/label';
 import { Form } from 'src/components/hook-form';
 import { Iconify } from 'src/components/iconify';
 
+import { useAuthContext } from 'src/auth/hooks';
+
 import { CreateOrderModal } from '../../order/view/create-order-modal';
 
 // ----------------------------------------------------------------------
@@ -40,8 +42,18 @@ export function ProductDetailsSummary({ product, ...other }) {
     available = 0,
     totalRatings = 0,
     totalReviews = 0,
-    inventoryType = 'in stock',
+    inventoryType = 'in stock'
   } = product || {};
+
+  // Roles (misma lógica que ProductDetailsToolbar)
+  const { user } = useAuthContext() ?? {};
+  const dropshipping = user?.dropshipping_user ?? user?.dropshipping ?? null;
+
+  const roleCode = String(dropshipping?.role_code ?? dropshipping?.roleCode ?? user?.role ?? '').toLowerCase();
+  const roleId = String(dropshipping?.role_id ?? dropshipping?.roleId ?? '').toLowerCase();
+
+  const isProvider =
+    roleCode.includes('provider') || roleCode.includes('prov') || roleId.includes('provider') || roleId.includes('prov');
 
   const providerName =
     (product?.provider && (typeof product.provider === 'object' ? product.provider.name : product.provider)) ||
@@ -220,20 +232,25 @@ export function ProductDetailsSummary({ product, ...other }) {
           width: '100%',
         }}
       >
-        <Button
-          variant="contained"
-          color="primary"
-          size="medium"
-          onClick={onSendToClient}
-          startIcon={<Iconify icon="solar:cart-check-bold" width={18} />}
-          sx={{
-            ...commonBtnSx,
-            flexBasis: { xs: '100%', sm: 'auto' },
-          }}
-        >
-          Generar venta
-        </Button>
+        {/* Misma lógica que "Agregar a favoritos": visible solo si NO es proveedor.
+           Si además quieres que solo droppers lo vean, añade && isDropper */}
+        {!isProvider && (
+          <Button
+            variant="contained"
+            color="primary"
+            size="medium"
+            onClick={onSendToClient}
+            startIcon={<Iconify icon="solar:cart-check-bold" width={18} />}
+            sx={{
+              ...commonBtnSx,
+              flexBasis: { xs: '100%', sm: 'auto' },
+            }}
+          >
+            Generar venta
+          </Button>
+        )}
 
+      {!isProvider && (
         <Button
           variant="contained"
           size="medium"
@@ -251,7 +268,7 @@ export function ProductDetailsSummary({ product, ...other }) {
         >
           Quiero probarlo
         </Button>
-
+      )}
         <Button
           variant="contained"
           size="medium"
@@ -296,9 +313,7 @@ export function ProductDetailsSummary({ product, ...other }) {
         <Stack spacing={3} sx={{ pt: 3 }} {...other}>
           <Stack spacing={2} alignItems="flex-start" sx={{ width: '100%' }}>
             {renderHeader()}
-
             {renderProviderCard()}
-
             {renderInventoryType()}
             {renderRating()}
             {renderPrices()}

@@ -15,19 +15,16 @@ import DialogActions from '@mui/material/DialogActions';
 
 import { uploadProduct } from 'src/actions/upload/uploadProducts';
 
+import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-
 const CSV_ACCEPTED = ['text/csv', 'application/vnd.ms-excel'];
 const CSV_ACCEPT_ATTR = '.csv';
-
 const IMG_ACCEPTED = ['image/jpeg', 'image/png'];
 const IMG_ACCEPT_ATTR = '.jpg,.jpeg,.png';
-
 const ZIP_ACCEPTED = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'];
 const ZIP_ACCEPT_ATTR = '.zip';
-
 const IMAGES_OR_ZIP_ACCEPT_ATTR = `${IMG_ACCEPT_ATTR},${ZIP_ACCEPT_ATTR}`;
 
 export default function ProductUploadBulkDialog({ open, onClose }) {
@@ -129,12 +126,8 @@ export default function ProductUploadBulkDialog({ open, onClose }) {
   };
 
   const hasValidImagesChoice = useMemo(() => {
-    if (imagesZip) {
-      return !(zipInvalid?.badType || zipInvalid?.tooBig);
-    }
-    if (images.length > 0) {
-      return imgsInvalid.badType.length === 0 && imgsInvalid.tooBig.length === 0;
-    }
+    if (imagesZip) return !(zipInvalid?.badType || zipInvalid?.tooBig);
+    if (images.length > 0) return imgsInvalid.badType.length === 0 && imgsInvalid.tooBig.length === 0;
     return false;
   }, [imagesZip, zipInvalid, images, imgsInvalid]);
 
@@ -147,19 +140,16 @@ export default function ProductUploadBulkDialog({ open, onClose }) {
   const buildImagesZip = useCallback(async (files) => {
     const JSZip = (await import('jszip')).default;
     const zip = new JSZip();
-
     await Promise.all(
       files.map(async (file) => {
         const arrayBuffer = await file.arrayBuffer();
         zip.file(file.name, arrayBuffer);
       })
     );
-
     const blob = await zip.generateAsync({
       type: 'blob',
       compression: 'STORE',
     });
-
     return new File([blob], 'images.zip', { type: 'application/zip' });
   }, []);
 
@@ -182,15 +172,25 @@ export default function ProductUploadBulkDialog({ open, onClose }) {
         options: {},
       });
 
-      if (resp.ok) {
-        setResult({ ok: true, message: 'Carga exitosa' });
+      const data = resp?.data ?? null;
+
+      if (resp.ok && data && (data.success === true || data.job_id)) {
+        const jobId = data.job_id ?? data?.jobId ?? null;
+        toast.success(jobId ? `Importación iniciada — Job: ${jobId}` : 'Importación iniciada');
+        setResult({ ok: true, message: data?.message ?? 'Carga iniciada' });
         setCsvFile(null);
         setImages([]);
         setImagesZip(null);
+      } else if (resp.ok && data && data.success === false) {
+        toast.error(data.message || 'No se pudo iniciar la importación');
+        setResult({ ok: false, message: data.message || 'No se pudo completar la carga' });
       } else {
+        toast.error(resp.message || 'Error al iniciar la importación');
         setResult({ ok: false, message: resp.message || 'No se pudo completar la carga' });
       }
     } catch (err) {
+      console.error('[ProductUploadBulkDialog] upload error', err);
+      toast.error(err?.message || 'Error en la carga');
       setResult({
         ok: false,
         message: err?.message || 'No se pudo completar la carga',
@@ -208,79 +208,40 @@ export default function ProductUploadBulkDialog({ open, onClose }) {
     textAlign: 'center',
     cursor: 'pointer',
     '&:hover': {
-      bgcolor: theme.vars
-        ? `rgba(${theme.vars.palette.primary.mainChannel} / 0.04)`
-        : 'action.hover',
+      bgcolor: theme.vars ? `rgba(${theme.vars.palette.primary.mainChannel} / 0.04)` : 'action.hover',
     },
   });
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ pb: 1 }}>Subir productos</DialogTitle>
-
       <DialogContent dividers sx={{ pt: 1.5 }}>
         <Stack spacing={3}>
           <Stack spacing={1}>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Incluye las medidas correctas (peso, longitud, ancho, alto, etc.), así nos aseguramos
-              que el costo de envío sea exacto, evitando cobros adicionales por refacturación.
+              Incluye las medidas correctas (peso, longitud, ancho, alto, etc.), así nos aseguramos que el costo de envío sea exacto.
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Formatos permitidos: CSV para datos y JPG/PNG para imágenes, o un ZIP con imágenes.
+              Formatos permitidos: CSV para datos y JPG/JPEG/PNG para imágenes, o un ZIP con imágenes.
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Tamaño máximo por archivo: 5 MB.
             </Typography>
           </Stack>
 
-          {/* Grid: zonas lado a lado en desktop (stack en mobile) */}
-          <Box
-            sx={{
-              display: 'grid',
-              gap: 2,
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-              alignItems: 'start',
-            }}
-          >
-            {/* CSV */}
+          <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, alignItems: 'start' }}>
             <Stack spacing={1}>
               <Typography variant="subtitle2">Archivo CSV</Typography>
-              <Box
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onDrop={onDropCsv}
-                onClick={onPickCsv}
-                sx={dropZoneSx}
-              >
+              <Box onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }} onDrop={onDropCsv} onClick={onPickCsv} sx={dropZoneSx}>
                 <Stack spacing={1.5} alignItems="center">
                   <Iconify icon="mdi:file-delimited" width={40} color="primary.main" />
-                  <Typography variant="subtitle2">
-                    Haz clic o arrastra aquí tu archivo CSV
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {CSV_ACCEPT_ATTR.toUpperCase()} — máx. 5 MB
-                  </Typography>
-
-                  <input
-                    ref={csvInputRef}
-                    type="file"
-                    accept={CSV_ACCEPT_ATTR}
-                    onChange={(e) => handleCsvFiles(e.target.files)}
-                    style={{ display: 'none' }}
-                  />
+                  <Typography variant="subtitle2">Haz clic o arrastra aquí tu archivo CSV</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{CSV_ACCEPT_ATTR.toUpperCase()} — máx. 5 MB</Typography>
+                  <input ref={csvInputRef} type="file" accept={CSV_ACCEPT_ATTR} onChange={(e) => handleCsvFiles(e.target.files)} style={{ display: 'none' }} />
                 </Stack>
               </Box>
 
-              {!!csvFile && (
-                <Chip
-                  sx={{ alignSelf: 'flex-start' }}
-                  label={`${csvFile.name} (${Math.round(csvFile.size / 1024)} KB)`}
-                  onDelete={() => setCsvFile(null)}
-                  size="small"
-                />
-              )}
+              {!!csvFile && <Chip sx={{ alignSelf: 'flex-start' }} label={`${csvFile.name} (${Math.round(csvFile.size / 1024)} KB)`} onDelete={() => setCsvFile(null)} size="small" />}
 
               {csvFile && (csvInvalid?.badType || csvInvalid?.tooBig) && (
                 <Alert severity="warning" variant="outlined">
@@ -290,86 +251,30 @@ export default function ProductUploadBulkDialog({ open, onClose }) {
               )}
             </Stack>
 
-            {/* Imágenes o ZIP */}
             <Stack spacing={1}>
               <Typography variant="subtitle2">Imágenes o ZIP</Typography>
-              <Box
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onDrop={onDropImages}
-                onClick={onPickImages}
-                sx={dropZoneSx}
-              >
+              <Box onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }} onDrop={onDropImages} onClick={onPickImages} sx={dropZoneSx}>
                 <Stack spacing={1.5} alignItems="center">
                   <Iconify icon="solar:zip-file-linear" width={40} color="primary.main" />
-                  <Typography variant="subtitle2">
-                    Haz clic o arrastra aquí tus imágenes (JPG/PNG) o un archivo ZIP
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {IMAGES_OR_ZIP_ACCEPT_ATTR.toUpperCase()} — máx. 5 MB por archivo/ZIP
-                  </Typography>
-
-                  <input
-                    ref={imgInputRef}
-                    type="file"
-                    accept={IMAGES_OR_ZIP_ACCEPT_ATTR}
-                    multiple
-                    onChange={(e) => handleImageFiles(e.target.files)}
-                    style={{ display: 'none' }}
-                  />
+                  <Typography variant="subtitle2">Haz clic o arrastra aquí tus imágenes (JPG/JPEG/PNG) o un archivo ZIP</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{IMAGES_OR_ZIP_ACCEPT_ATTR.toUpperCase()} — máx. 5 MB por archivo/ZIP</Typography>
+                  <input ref={imgInputRef} type="file" accept={IMAGES_OR_ZIP_ACCEPT_ATTR} multiple onChange={(e) => handleImageFiles(e.target.files)} style={{ display: 'none' }} />
                 </Stack>
               </Box>
 
-              {/* Mostrar ZIP seleccionado o lista de imágenes */}
               {imagesZip ? (
-                <Chip
-                  sx={{ alignSelf: 'flex-start' }}
-                  label={`${imagesZip.name} (${Math.round(imagesZip.size / 1024)} KB)`}
-                  onDelete={() => setImagesZip(null)}
-                  size="small"
-                />
+                <Chip sx={{ alignSelf: 'flex-start' }} label={`${imagesZip.name} (${Math.round(imagesZip.size / 1024)} KB)`} onDelete={() => setImagesZip(null)} size="small" />
               ) : (
-                !!images.length && (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {images.map((f) => (
-                      <Chip
-                        key={f.name + f.size}
-                        label={`${f.name} (${Math.round(f.size / 1024)} KB)`}
-                        onDelete={() => setImages((prev) => prev.filter((x) => x !== f))}
-                        size="small"
-                      />
-                    ))}
-                  </Box>
-                )
+                !!images.length && <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>{images.map((f) => <Chip key={f.name + f.size} label={`${f.name} (${Math.round(f.size / 1024)} KB)`} onDelete={() => setImages((prev) => prev.filter((x) => x !== f))} size="small" />)}</Box>
               )}
 
-              {/* Alertas de validación */}
               {imagesZip ? (
-                (zipInvalid?.badType || zipInvalid?.tooBig) && (
-                  <Alert severity="warning" variant="outlined">
-                    {zipInvalid.badType && <div>El ZIP no tiene un tipo válido.</div>}
-                    {zipInvalid.tooBig && <div>El ZIP supera los 5 MB.</div>}
-                  </Alert>
-                )
+                (zipInvalid?.badType || zipInvalid?.tooBig) && <Alert severity="warning" variant="outlined">{zipInvalid.badType && <div>El ZIP no tiene un tipo válido.</div>}{zipInvalid.tooBig && <div>El ZIP supera los 5 MB.</div>}</Alert>
               ) : (
                 (imgsInvalid.badType.length > 0 || imgsInvalid.tooBig.length > 0) && (
                   <Alert severity="warning" variant="outlined">
-                    {imgsInvalid.badType.length > 0 && (
-                      <div>
-                        Imágenes con tipo no permitido:{' '}
-                        {imgsInvalid.badType.slice(0, 3).join(', ')}
-                        {imgsInvalid.badType.length > 3 ? '…' : ''}
-                      </div>
-                    )}
-                    {imgsInvalid.tooBig.length > 0 && (
-                      <div>
-                        Imágenes que superan 5 MB:{' '}
-                        {imgsInvalid.tooBig.slice(0, 3).join(', ')}
-                        {imgsInvalid.tooBig.length > 3 ? '…' : ''}
-                      </div>
-                    )}
+                    {imgsInvalid.badType.length > 0 && <div>Imágenes con tipo no permitido: {imgsInvalid.badType.slice(0, 3).join(', ')}{imgsInvalid.badType.length > 3 ? '…' : ''}</div>}
+                    {imgsInvalid.tooBig.length > 0 && <div>Imágenes que superan 5 MB: {imgsInvalid.tooBig.slice(0, 3).join(', ')}{imgsInvalid.tooBig.length > 3 ? '…' : ''}</div>}
                   </Alert>
                 )
               )}
@@ -377,34 +282,18 @@ export default function ProductUploadBulkDialog({ open, onClose }) {
           </Box>
 
           {result && (
-            <Alert
-              severity={result.ok ? 'success' : 'error'}
-              icon={<Iconify icon={result.ok ? 'mdi:check-circle' : 'mdi:close-circle'} width={20} />}
-            >
-              {result.ok ? 'Carga exitosa' : 'Carga fallida'}
-              {result.message ? ` — ${result.message}` : ''}
+            <Alert severity={result.ok ? 'success' : 'error'} icon={<Iconify icon={result.ok ? 'mdi:check-circle' : 'mdi:close-circle'} width={20} />}>
+              {result.ok ? 'Carga exitosa' : 'Carga fallida'}{result.message ? ` — ${result.message}` : ''}
             </Alert>
           )}
         </Stack>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        {!!csvFile || !!images.length || !!imagesZip ? (
-          <Button color="primary" onClick={clearAll} disabled={uploading} variant="text">
-            Limpiar
-          </Button>
-        ) : null}
+        {!!csvFile || !!images.length || !!imagesZip ? <Button color="primary" onClick={clearAll} disabled={uploading} variant="text">Limpiar</Button> : null}
         <Box sx={{ flexGrow: 1 }} />
-        <Button onClick={onClose} disabled={uploading} color="primary" variant="text">
-          Cancelar
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleUpload}
-          disabled={disabledUpload}
-          startIcon={<Iconify icon="solar:upload-minimalistic-bold" />}
-        >
+        <Button onClick={onClose} disabled={uploading} color="primary" variant="text">Cancelar</Button>
+        <Button variant="contained" color="primary" onClick={handleUpload} disabled={disabledUpload} startIcon={<Iconify icon="solar:upload-minimalistic-bold" />}>
           {uploading ? 'Cargando…' : 'Cargar plantilla'}
         </Button>
       </DialogActions>

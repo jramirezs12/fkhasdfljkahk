@@ -14,8 +14,6 @@ import FormHelperText from '@mui/material/FormHelperText';
 
 import { Iconify } from 'src/components/iconify';
 
-import { PaymentCardCreateForm } from '../payment/payment-card-create-form';
-
 // ----------------------------------------------------------------------
 
 export function CheckoutPaymentMethods({ name, options, sx, ...other }) {
@@ -69,7 +67,7 @@ export function CheckoutPaymentMethods({ name, options, sx, ...other }) {
       <Dialog fullWidth maxWidth="xs" open={openForm.value} onClose={openForm.onFalse}>
         <DialogTitle>Add card</DialogTitle>
 
-        <PaymentCardCreateForm sx={{ px: 3 }} />
+
 
         <DialogActions>
           <Button color="inherit" variant="outlined" onClick={openForm.onFalse}>

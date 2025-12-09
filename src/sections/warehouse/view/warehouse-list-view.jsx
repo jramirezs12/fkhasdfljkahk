@@ -1,28 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
+import { Dialog } from '@mui/material';
 import Button from '@mui/material/Button';
-import { Box, Dialog, Typography, CircularProgress } from '@mui/material';
+//import { Box, Dialog, Typography, CircularProgress } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+import { RouterLink } from 'src/routes/components';
 
-import { useGetWarehouse } from 'src/hooks/warehouse/useGetWarehouse';
+import { CHANGE_WAREHOUSE_STATUS } from 'src/hooks/warehouse/mutations';
+import { useGetWarehouseFix } from 'src/hooks/warehouse/useGetWarehouseFix';
 
 import { HomeContent } from 'src/layouts/home';
 import { requestGql } from 'src/lib/graphqlRequest';
-import { CHANGE_WAREHOUSE_STATUS } from 'src/actions/warehouses/mutations';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
+import { EmptyContent } from 'src/components/empty-content';
+import { ErrorContent } from 'src/components/error-content';
+import { LoadingScreen } from 'src/components/loading-screen';
+import { PermissionContent } from 'src/components/permission-content';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+
+import { useAuthContext } from 'src/auth/hooks';
 
 import { WarehouseCardList } from '../components/warehouse-card-list';
 import { WarehouseCreateForm } from '../components/warehouse-create-form';
 
 export function WarehouseListView() {
+  const router = useRouter();
+  const { user } = useAuthContext();
+
+  useEffect(() => {
+    if (user === null) {
+      router.replace(paths.auth.login);
+    }
+  }, [user, router]);
+
   const [openDialog, setOpenDialog] = useState(false);
-  const { warehouses, isLoading, error, refetch } = useGetWarehouse();
+  const { warehouses, isLoading, error, refetch } = useGetWarehouseFix();
 
   const handleSubmitDialog = () => {
     setOpenDialog(false);
@@ -40,6 +58,50 @@ export function WarehouseListView() {
       toast.error('No se pudo actualizar el estado de la sucursal');
     }
   };
+
+  /*
+  const handleDeleteWarehouse = async (id) => {
+    try {
+      await requestGql('ChangeWarehouseStatus', CHANGE_WAREHOUSE_STATUS, { id });
+      toast.success(`Sucursal ${currentStatus === 'active' ? 'inhabilitada' : 'habilitada'} correctamente`);
+      refetch();
+
+    } catch (e) {
+      console.error(e);
+      toast.error('No se pudo actualizar el estado de la sucursal');
+    }
+  };
+  */
+
+  if (user === null) {
+    return null;
+  } else if (user.dropshipping === null || user.dropshipping.status !== 'approved') {
+    return (
+      <HomeContent>
+        <PermissionContent
+          title="Acceso denegado"
+          description="No tienes permiso para ver las sucursales. Tu cuenta está pendiente de aprobación."
+          sx={{ mt: 10 }}
+        />
+      </HomeContent>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <LoadingScreen />
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorContent
+        title="Sucursales no disponibles"
+        description="Lo sentimos, no pudimos cargar las sucursales en este momento. Por favor, intenta nuevamente más tarde."
+        sx={{ mt: 2 }}
+      />
+    );
+  }
 
   return (
     <>
@@ -61,18 +123,28 @@ export function WarehouseListView() {
           }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
-
-        {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="40vh">
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Typography color="error" textAlign="center">
-            Error al cargar las sucursales: {error.message}
-          </Typography>
-        ) : (
-          <WarehouseCardList warehouses={warehouses} onToggleActive={handleToggleActive} />
-        )}
+        {
+          !warehouses || warehouses.length === 0 ? (
+            <EmptyContent
+              filled
+              title="No hay sucursales"
+              description="Crea una sucursal para comenzar a gestionarlas."
+              action={
+                <Button
+                  component={RouterLink}
+                  href={paths.home.root}
+                  size='medium'
+                  variant="contained"
+                  sx={{ mt: 4 }}>
+                  Ir al inicio
+                </Button>
+              }
+              sx={{ pt: 2, height: 'auto', flexGrow: 'unset' }}
+            />
+          ) : (
+            <WarehouseCardList warehouses={warehouses} onToggleActive={handleToggleActive} />
+          )
+        }
       </HomeContent>
 
       <Dialog

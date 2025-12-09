@@ -1,3 +1,5 @@
+import { CONFIG } from 'src/global-config';
+
 export function adaptOrderList(data) {
     if (!data || !data.items) {
         console.warn("No se obtienen ordenes del backend:", data);
@@ -32,7 +34,7 @@ export function adaptOrderList(data) {
             },
             items: order.items.map((i) => ({
                 id: i.id,
-                coverUrl: i.product.thumbnail.url,
+                coverUrl: (i.product) ? i.product.thumbnail.url : CONFIG.assetsDir + '/assets/images/img-not-found.jpg',
                 name: i.product_name,
                 sku: i.product_sku,
                 quantity: i.quantity_ordered,

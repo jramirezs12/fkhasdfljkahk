@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
 import { merge } from 'es-toolkit';
+import { useMemo, useEffect } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -11,7 +11,10 @@ import { iconButtonClasses } from '@mui/material/IconButton';
 
 import { usePathname } from 'src/routes/hooks';
 
-import { _notifications } from 'src/_mock';
+import { useNotificationsOrder } from 'src/hooks/notification/useNotificationsOrder';
+
+import { useNotificationsStore } from 'src/store/notificationsStore';
+import { adaptNotificationOrder } from "src/actions/notification/adapters/orderNotificationAdapter";
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
@@ -86,6 +89,16 @@ export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg
     return !allowedRoles.includes(userRole); // true => ocultar
   };
 
+  const notificationsStore = useNotificationsStore.getState();
+
+  const { data: notifications, isSuccess } = useNotificationsOrder();
+
+  useEffect(() => {
+    if (isSuccess && notifications) {
+      notificationsStore.addNotificationsIfNotExist(adaptNotificationOrder(notifications));
+    }
+  }, [isSuccess, notifications, notificationsStore]);
+
   const renderHeader = () => {
     const headerSlotProps = {
       container: {
@@ -145,7 +158,7 @@ export function HomeLayout({ sx, cssVars, children, slotProps, layoutQuery = 'lg
       ),
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
-          <NotificationsDrawer data={_notifications} />
+          <NotificationsDrawer />
           <AccountDrawer data={_account} />
         </Box>
       ),

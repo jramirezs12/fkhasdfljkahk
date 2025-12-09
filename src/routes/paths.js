@@ -18,6 +18,7 @@ export const paths = {
   // AUTH
   auth: {
     login: `${ROOTS.AUTH}/login`,
+    register: `${ROOTS.AUTH}/register`
   },
   // HOME
   home: {
@@ -41,6 +42,7 @@ export const paths = {
       list: `${ROOTS.HOME}/product/list`,
       listDetails: (id) => `${ROOTS.HOME}/product/list/${id}`,
       upload: `${ROOTS.HOME}/product/upload`,
+      uploadList: `${ROOTS.HOME}/product/upload/list`,
       integrations: `${ROOTS.HOME}/product/integrations`,
     },
     provider: {
@@ -48,6 +50,7 @@ export const paths = {
     },
     order: {
       root: `${ROOTS.HOME}/order`,
+      massive: `${ROOTS.HOME}/order/massive`,
       details: (id) => `${ROOTS.HOME}/order/${id}`,
     },
     warehouse: {
@@ -73,18 +76,22 @@ export const ROUTE_PERMISSIONS = [
   { pattern: '/home/product/:id', allowedRoles: ['dropper', 'provider'] },
 
   // listado y CRUD del módulo de productos -> solo dropper
-  { pattern: '/home/product/list',  },
-  { pattern: '/home/product/create', },
-  { pattern: '/home/product/upload' },
-  { pattern: '/home/product/integrations' },
+  { pattern: '/home/product/list', allowedRoles: ['dropper', 'provider']  },
+  { pattern: '/home/product/create', allowedRoles: ['provider']  },
+  { pattern: '/home/product/upload', allowedRoles: ['provider']  },
+  { pattern: '/home/product/integrations', allowedRoles: ['provider'] },
 
   // si quieres bloquear la raíz /home/product solo para dropper (opcional)
-  { pattern: '/home/product', allowedRoles: ['dropper'] },
+  { pattern: '/home/store', allowedRoles: ['dropper'] },
 
   // ejemplo: permitir provider y dropper en listDetails
-  { pattern: '/home/product/list/:id', allowedRoles: ['dropper', 'provider'] },
+  { pattern: '/home/product/list/:id', allowedRoles: ['dropper'] },
 
-  // Puedes añadir más reglas aquí...
+  { pattern: '/home/warehouse', allowedRoles: ['provider'] },
+
+  { pattern: '/home/account', allowedRoles: ['dropper', 'provider'] },
+
+  { pattern: '/home/banking', allowedRoles: ['dropper', 'provider'] },
 ];
 
 // ---------- helpers para comparar patrones ----------

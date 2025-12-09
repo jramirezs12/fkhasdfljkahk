@@ -14,9 +14,10 @@ import { AppWelcome } from '../app-welcome';
 import { AppFeatured } from '../app-featured';
 import { AppTopAuthors } from '../app-top-authors';
 import { AppNewInvoices } from '../app-new-invoices';
+import { BankingOverview } from '../banking-overview';
 import { AppWidgetSummary } from '../app-widget-summary';
 import { AppCurrentDownload } from '../app-current-download';
-import { BankingOverview } from '../banking-overview'; // añadí BankingOverview
+ // añadí BankingOverview
 
 // ----------------------------------------------------------------------
 

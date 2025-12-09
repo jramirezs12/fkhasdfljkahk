@@ -11,6 +11,15 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
+// ---------------------- Refresh token ----------------------
+export const REFRESH_CUSTOMER_TOKEN = gql`
+  mutation RefreshCustomerToken {
+    refreshCustomerToken(token: null) {
+      token
+    }
+  }
+`;
+
 // ---------------------- OTP (teléfono) ----------------------
 export const VALIDATE_PHONE = gql`
   query validatePhone($phone: String!) {
@@ -92,6 +101,28 @@ export const ME_QUERY = gql`
         status
         user_id
       }
+    }
+  }
+`;
+
+export const DROPSHIPPING_ROLES_QUERY = gql`
+  query DropshippingRoles {
+    dropshippingRoles {
+      id
+      code
+      label
+    }
+  }
+`;
+
+// Asignar rol de dropshipping al usuario autenticado
+export const ASSIGN_DROPSHIPPING_USER_ROLE = gql`
+  mutation AssignDropshippingUserRole($user_id: Int!, $role_id: Int!) {
+    assignDropshippingUserRole(input: { user_id: $user_id, role_id: $role_id }) {
+      id
+      role_id
+      status
+      user_id
     }
   }
 `;

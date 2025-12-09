@@ -106,3 +106,26 @@ export const GET_ORDER = gql`
     }
   }
 `;
+
+export const GET_GUIDES_BY_ORDER = gql`
+  query GetGuidesByOrder($order_uid: ID!) {
+    getOrderGuides(order_uid: $order_uid) {
+      guidesZip
+      success
+    }
+  }
+`;
+
+export const GET_ORDERS_NOTIFICATION = gql`
+  query GetOrdersNotification {
+    getDropshippingOrders {
+      items {
+        id
+        order_number
+        status
+        created_at
+        order_track_number
+      }
+    }
+  }
+`;

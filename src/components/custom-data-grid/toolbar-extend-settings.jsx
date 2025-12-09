@@ -1,7 +1,7 @@
 'use client';
 
 import { usePopover } from 'minimal-shared/hooks';
-import { useState, useCallback, useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 import Menu from '@mui/material/Menu';
 import Tooltip from '@mui/material/Tooltip';
@@ -69,6 +69,7 @@ export function CustomToolbarSettingsButton({
 }) {
   // Fallbacks robustos: previenen crashes si no pasan props
   const safeSettings = settings ?? DEFAULT_TOOLBAR_SETTINGS;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const safeOnChangeSettings = onChangeSettings ?? (() => {});
 
   const { open, anchorEl, onClose, onOpen } = usePopover();

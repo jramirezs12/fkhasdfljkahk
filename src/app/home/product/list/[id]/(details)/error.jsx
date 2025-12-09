@@ -8,16 +8,16 @@ import { RouterLink } from 'src/routes/components';
 import { HomeContent } from 'src/layouts/home';
 
 import { Iconify } from 'src/components/iconify';
-import { EmptyContent } from 'src/components/empty-content';
+import { ErrorContent } from 'src/components/error-content';
 
 // ----------------------------------------------------------------------
 
 export default function Error({ error, reset }) {
   return (
     <HomeContent maxWidth={false} sx={{ pt: 5 }}>
-      <EmptyContent
+      <ErrorContent
         filled
-        title="Lista no encontrada!"
+        title="Lista no enconsdftrada!"
         action={
           <Button
             component={RouterLink}
@@ -25,7 +25,7 @@ export default function Error({ error, reset }) {
             startIcon={<Iconify width={16} icon="eva:arrow-ios-back-fill" />}
             sx={{ mt: 3 }}
           >
-            Volver a la lista
+            Volver a la listaasdf
           </Button>
         }
         sx={{ py: 10, height: 'auto', flexGrow: 'unset' }}

@@ -1,7 +1,7 @@
 'use client';
 
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -46,10 +46,6 @@ export function ProviderProfileView({
   const selectedTab = searchParams.get(TAB_PARAM) ?? '';
 
   const providerName = provider?.name ?? `Proveedor ${provider?.id ?? ''}`;
-  const providerId = provider?.id ?? '';
-
-  const [followed, setFollowed] = useState(false);
-  const handleFollow = useCallback(() => setFollowed((s) => !s), []);
 
   const createRedirectPath = useCallback(
     (currentPath, query) => {

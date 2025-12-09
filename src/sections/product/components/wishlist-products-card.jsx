@@ -34,19 +34,8 @@ export function WishlistProductCard({ product, onAdd }) {
   } = product || {};
 
   const handleAdd = async () => {
-    // Llamamos al callback si se pasa; si no, no hacemos nada (solo log)
-    try {
-      if (typeof onAdd === 'function') {
-        await onAdd(product);
-      } else {
-        // No-op por defecto (evita dependencia de checkout)
-        // Puedes conectar onAdd desde el padre para integrar el carrito.
-        // eslint-disable-next-line no-console
-        console.log('Añadir producto (no-op). Implementa onAdd en el padre si deseas añadir al carrito.', product);
-      }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Error en onAdd:', err);
+    if (typeof onAdd === 'function') {
+      await onAdd(product);
     }
   };
 

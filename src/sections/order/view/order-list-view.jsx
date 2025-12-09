@@ -8,11 +8,12 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
-import Alert from '@mui/material/Alert';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
 import TableBody from '@mui/material/TableBody';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
 import { useDropshippingOrders } from "src/hooks/order/getDropshippingOrders";
 
@@ -23,7 +24,9 @@ import { adaptOrderList } from "src/actions/order/adapters/orderListAdapter";
 
 import { Label } from 'src/components/label';
 import { Scrollbar } from 'src/components/scrollbar';
+import { ErrorContent } from 'src/components/error-content';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+import { PermissionContent } from 'src/components/permission-content';
 import {
   useTable,
   emptyRows,
@@ -35,12 +38,23 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { useAuthContext } from 'src/auth/hooks';
+
 import { OrderTableRow } from '../components/order-table-row';
 import { OrderTableToolbar } from '../components/order-table-toolbar';
 import { STATUS_COLORS, TABLE_ORDER_HEAD } from '../resources/constants';
 import { OrderTableFiltersResult } from '../components/order-table-filters-result';
 
 export function OrderListView() {
+  const router = useRouter();
+  const { user } = useAuthContext();
+
+  useEffect(() => {
+    if (user === null) {
+      router.replace(paths.auth.login);
+    }
+  }, [user, router]);
+
   const table = useTable({
     defaultOrderBy: 'createdAt',
     defaultOrder: 'desc',
@@ -94,24 +108,54 @@ export function OrderListView() {
     [updateFilters, table]
   );
 
+  if (user === null) {
+    return null;
+  } else if (user.dropshipping === null || user.dropshipping.status !== 'approved') {
+    return (
+      <HomeContent>
+        <PermissionContent
+          title="Acceso denegado"
+          description="No tienes permiso para ver ordenes. Tu cuenta está pendiente de aprobación."
+          sx={{ mt: 10 }}
+        />
+      </HomeContent>
+    );
+  }
+
   return (
     <HomeContent>
-      <CustomBreadcrumbs
-        heading="Mis Ordenes"
-        links={[
-          { name: 'Inicio', href: paths.home.root },
-          { name: 'Lista de ordenes' },
-        ]}
-        sx={{ mb: { xs: 3, md: 5 } }}
-      />
+      {/* Breadcrumb + action button */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: { xs: 3, md: 5 } }}>
+        <CustomBreadcrumbs
+          heading="Mis Ordenes"
+          links={[
+            { name: 'Inicio', href: paths.home.root },
+            { name: 'Lista de ordenes' },
+          ]}
+          sx={{ m: 0 }}
+        />
+        <Button
+          variant="contained"
+          onClick={() => router.push(paths.home.order.massive)}
+          aria-label="Crear orden masiva"
+          sx={{
+            ml: 2,
+            bgcolor: 'common.black',
+            color: 'common.white',
+            '&:hover': { bgcolor: 'grey.900' },
+          }}
+        >
+          Crear orden masiva
+        </Button>
+      </Box>
 
-      {isError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          Error al cargar órdenes.
-        </Alert>
-      )}
-
-      {!isError && (
+      {isError ? (
+        <ErrorContent
+          title="Ordenes no disponibles"
+          description="Lo sentimos, no pudimos cargar las órdenes en este momento. Por favor, intenta nuevamente más tarde."
+          sx={{ mt: 0 }}
+        />
+      ) : (
         <Card>
           <Tabs
             value={currentFilters.status}

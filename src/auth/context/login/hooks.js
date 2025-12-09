@@ -1,16 +1,16 @@
 'use client';
 
 import Cookies from 'js.cookie';
-import { useMutation } from '@tanstack/react-query';
+import { useQuery , useMutation } from '@tanstack/react-query';
 
 import axios from 'src/lib/axios';
 import { useAuthStore } from 'src/store/authStore';
+import { requestGql } from 'src/lib/graphqlRequest';
 import { useLoginPhoneStore } from 'src/store/loginPhoneStore';
 
 import { setSession } from '../login/utils';
 import { STORAGE_KEY } from '../login/constant';
-import { CREATE_OTP, VALIDATE_OTP, VALIDATE_PHONE, LOGIN_MUTATION } from './queries';
-import { requestGql } from 'src/lib/graphqlRequest';
+import { CREATE_OTP, VALIDATE_OTP, VALIDATE_PHONE, LOGIN_MUTATION, DROPSHIPPING_ROLES_QUERY, ASSIGN_DROPSHIPPING_USER_ROLE  } from './queries';
 
 export function useEmailLoginMutation() {
   return useMutation({
@@ -150,4 +150,33 @@ function parseExpiration(raw) {
   const date = new Date(isoGuess);
   const ts = date.getTime();
   return Number.isNaN(ts) ? Date.now() : ts;
+}
+// Lista de roles
+export function useDropshippingRoles() {
+  return useQuery({
+    queryKey: ['dropshippingRoles'],
+    queryFn: async () => {
+      const res = await requestGql('DropshippingRoles', DROPSHIPPING_ROLES_QUERY, null);
+      return Array.isArray(res?.dropshippingRoles) ? res.dropshippingRoles : [];
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+// Asignar rol al usuario actual
+export function useAssignDropshippingRole() {
+  return useMutation({
+    mutationKey: ['assignDropshippingUserRole'],
+    mutationFn: async ({ userId, roleId }) => {
+      const res = await requestGql('AssignDropshippingUserRole', ASSIGN_DROPSHIPPING_USER_ROLE, {
+        user_id: Number(userId),
+        role_id: Number(roleId),
+      });
+      const payload = res?.assignDropshippingUserRole;
+      if (!payload?.id || !payload?.role_id) {
+        throw new Error('No se pudo asignar el rol. Intenta nuevamente.');
+      }
+      return payload;
+    },
+  });
 }

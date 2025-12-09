@@ -1,236 +1,72 @@
-'use server';
-
-import { headers } from 'next/headers';
 import { GraphQLClient } from 'graphql-request';
+import { unstable_noStore as noStore } from 'next/cache';
 
 import { PRODUCT_BY_SKU } from './queries';
+import { adaptProductFromMagento } from './adapters';
 
-// ---------- Helpers ----------
-function unique(arr = []) {
-  return Array.from(new Set(arr.filter(Boolean)));
-}
-function num(n, d = 0) {
-  const v = Number(n);
-  return Number.isFinite(v) ? v : d;
-}
-function parseCustomAttributes(items = []) {
-  const byCode = (code) => items.find((i) => i?.code === code)?.value || null;
-  return {
-    description:
-      byCode('description') ||
-      byCode('short_description') ||
-      '',
-    providerAttr:
-      byCode('provider') ||
-      byCode('proveedor') ||
-      byCode('vendor') ||
-      null,
-    rawPriceAttr: byCode('price'),
-  };
-}
-
-// ---------- Adaptador a la UI ----------
-function adaptProductFromMagento(raw) {
-  if (!raw) return null;
-
-  // Precios base (proveedor)
-  const min = raw.price_range?.minimum_price;
-  const regular = num(min?.regular_price?.value, 0);
-  const final = num(min?.final_price?.value, regular);
-  const { rawPriceAttr, description, providerAttr } = parseCustomAttributes(
-    raw.custom_attributes_info?.items || []
-  );
-
-  // Precio del proveedor: prioridad al final_price, luego regular_price, luego custom attr "price"
-  const providerPrice = final || regular || num(rawPriceAttr, 0);
-  const suggestedPrice = providerPrice * 2.09;
-
-  // Imágenes desde media_gallery
-  const media = Array.isArray(raw.media_gallery) ? raw.media_gallery : [];
-  const galleryUrls = media
-    .filter((m) => !m.disabled && m?.url)
-    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
-    .map((m) => m.url);
-
-  // Fallback a imagen base/variantes si media_gallery viene vacío
-  if (galleryUrls.length === 0) {
-    const baseImage = raw.image?.url || null;
-    const variantImages =
-      raw.variants?.map((v) => v?.product?.image?.url).filter(Boolean) || [];
-    galleryUrls.push(...unique([baseImage, ...variantImages]));
-  }
-
-  // Opciones configurables (si aplica)
-  const cfg = raw.configurable_product_options_selection?.configurable_options || [];
-  const pickValues = (needle) =>
-    (cfg.find((o) => String(o?.label || '').toLowerCase().includes(needle))?.values || [])
-      .map((v) => v?.label)
-      .filter(Boolean);
-
-  const colors = pickValues('color');
-  const sizes = pickValues('size');
-
-  // Stock
-  const available = num(raw.stock_saleable, 0);
-  const stockStatus = String(raw.stock_status || '').toUpperCase();
-  const inventoryType =
-    available > 0 || stockStatus === 'IN_STOCK' ? 'in stock' : 'out of stock';
-
-  let provider = null;
-  const rawProvider = raw?.provider ?? null;
-
-  if (rawProvider) {
-    if (typeof rawProvider === 'object') {
-      provider = {
-        id: rawProvider.id ?? rawProvider.uid ?? null,
-        // eslint-disable-next-line no-constant-binary-expression
-        name: rawProvider.name ?? rawProvider.label ?? String(rawProvider) ?? null,
-        image: rawProvider?.image?.url ?? null,
-        warehouse_product: rawProvider?.warehouse_product ?? null,
-      };
-    } else {
-      provider = { id: null, name: String(rawProvider) };
-    }
-  } else if (providerAttr) {
-    provider = { id: null, name: providerAttr };
-  } else if (Array.isArray(raw.categories) && raw.categories[0]?.name) {
-    provider = { id: null, name: raw.categories[0].name };
-  } else {
-    provider = null;
-  }
-
-  let warehouseId = null;
-  try {
-    const wp = provider?.warehouse_product ?? raw.provider?.warehouse_product ?? null;
-    if (Array.isArray(wp) && wp.length > 0) {
-      warehouseId = wp[0]?.warehouse_id ?? null;
-    } else if (wp && typeof wp === 'object') {
-      warehouseId = wp.warehouse_id ?? null;
-    }
-    if (warehouseId !== null) warehouseId = String(warehouseId);
-  } catch (err) {
-    warehouseId = null;
-  }
-
-  // Labels (si quieres mantenerlos)
-  const percentOff = num(min?.discount?.percent_off, 0);
-  const saleLabel = {
-    enabled: percentOff > 0,
-    content: percentOff > 0 ? `${percentOff}% OFF` : '',
-  };
-  const newLabel = { enabled: false, content: '' };
-
-  // Reviews (placeholder; completa cuando tengas fuente real)
-  const ratings = [];
-  const reviews = [];
-  const totalRatings = 0;
-  const totalReviews = 0;
-
-  return {
-    // Identificadores
-    id: raw.id || '',
-    uid: raw.uid || '',
-    sku: raw.sku || '',
-    name: raw.name || '',
-
-    // Proveedor y precios
-    provider,
-    providerPrice,
-    suggestedPrice,
-
-    // Warehouse id (string) asociado al producto/proveedor (si existe)
-    warehouseId,
-
-    // Imágenes para el carrusel
-    images: unique(galleryUrls),
-
-    // Stock y estado
-    available,
-    inventoryType,
-
-    // Variantes
-    colors,
-    sizes,
-
-    // Descripciones
-    description,
-    subDescription: '',
-
-    // UI labels (opcionales)
-    saleLabel,
-    newLabel,
-
-    // Reviews
-    ratings,
-    reviews,
-    totalRatings,
-    totalReviews,
-
-    // Categorías e info adicional
-    categories: raw.categories || [],
-    publish: 'published',
-  };
-}
-
-// ---------- Resolver SSR del endpoint (idéntico a cliente con proxy) ----------
+// ---------- Endpoint ----------
 function resolveGraphqlUrlSSR() {
-  // Igual que src/lib/graphqlClient: primero env, si no, usa host + /api/graphql-proxy
-  let endpoint =
-    process.env.NEXT_PUBLIC_ALCARRITO_GRAPHQL_URL ||
+  const direct =
     process.env.ALCARRITO_GRAPHQL_URL ||
+    process.env.NEXT_PUBLIC_ALCARRITO_GRAPHQL_URL ||
     '';
 
-  if (!endpoint) {
-    try {
-      const h = headers();
-      const host = h.get('x-forwarded-host') || h.get('host');
-      const proto = h.get('x-forwarded-proto') || 'http';
-      if (host) endpoint = `${proto}://${host}/api/graphql-proxy`;
-    } catch {
-      endpoint = 'http://localhost:3000/api/graphql-proxy';
-    }
-  }
+  if (direct) return direct;
 
-  // Validar url
-  try {
-    // eslint-disable-next-line no-new
-    new URL(endpoint);
-  } catch {
-    throw new Error(
-      `Endpoint GraphQL inválido: "${endpoint}". Define NEXT_PUBLIC_ALCARRITO_GRAPHQL_URL o ALCARRITO_GRAPHQL_URL, o expón /api/graphql-proxy.`
-    );
-  }
-  return endpoint;
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
+
+  if (siteUrl) return `${siteUrl}/api/graphql-proxy`;
+
+  return 'http://localhost:3000/api/graphql-proxy';
 }
 
-// ---------- Acción SSR ----------
+// ---------- Headers SSR ----------
+function buildSsrHeaders() {
+  const base = { 'Content-Type': 'application/json' };
+  const authHeader = process.env.ALCARRITO_SSR_AUTH;
+  const authToken = process.env.ALCARRITO_SSR_TOKEN;
+  if (authHeader) return { ...base, Authorization: authHeader };
+  if (authToken) return { ...base, Authorization: `Bearer ${authToken}` };
+  return base;
+}
+
+// ---------- Fetch producto (SIN cache estático) ----------
 export async function getProduct(sku, providerId = null) {
+  noStore();
+
   const endpoint = resolveGraphqlUrlSSR();
+  const headers = buildSsrHeaders();
 
   const client = new GraphQLClient(endpoint, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    fetch: (url, init) =>
+      fetch(url, {
+        ...init,
+        cache: 'no-store',
+        next: { revalidate: 0 },
+      }),
   });
 
   const variables = { sku: String(sku) };
-  // Si se pasa providerId, enviarlo como FilterEqualTypeInput { eq: providerId }
-  if (providerId) {
-    variables.provider_id = { eq: String(providerId) };
-  }
+  if (providerId) variables.provider_id = { eq: String(providerId) };
 
-  let data;
   try {
-    data = await client.request(PRODUCT_BY_SKU, variables);
+    const data = await client.request(PRODUCT_BY_SKU, variables);
+    const items = data?.dropshippingProducts?.items || [];
+    if (!items.length) return { product: null };
+    return { product: adaptProductFromMagento(items[0]) };
   } catch (err) {
     console.error('[SSR getProduct] GraphQL error', {
       status: err?.response?.status,
       message: err?.message,
       endpoint,
+      hasAuthHeader: Boolean(headers.Authorization),
     });
-    return { product: null, error: { status: err?.response?.status || 500, message: err.message } };
+    return {
+      product: null,
+      error: { status: err?.response?.status || 500, message: err?.message || 'fetch failed' },
+    };
   }
-
-  const items = data?.dropshippingProducts?.items || [];
-  if (!items.length) return { product: null };
-
-  return { product: adaptProductFromMagento(items[0]) };
 }

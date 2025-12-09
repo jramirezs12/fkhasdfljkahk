@@ -63,7 +63,6 @@ export function UserProfileView() {
     [firstName, lastName].filter(Boolean).join(' ') ||
     user?.email ||
     'Usuario';
-  const email = user?.email || '';
 
   const [searchFriends, setSearchFriends] = useState('');
 

@@ -17,7 +17,6 @@ import {
   ExportPrint,
   QuickFilter,
   QuickFilterClear,
-  useGridApiContext,
   FilterPanelTrigger,
   QuickFilterControl,
   ColumnsPanelTrigger,

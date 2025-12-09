@@ -20,7 +20,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import FormHelperText from '@mui/material/FormHelperText';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-import { useCreateWarehouse } from 'src/hooks/warehouse/useCreateWarehouse';
+import { useCreateWarehouseFix } from 'src/hooks/warehouse/useCreateWarehouseFix';
 
 import { useGetCities } from 'src/actions/order/order';
 
@@ -51,7 +51,7 @@ export const WarehouseSchema = z.object({
 
 export function WarehouseCreateForm({ onClose, onSubmit }) {
 
-    const { mutateAsync } = useCreateWarehouse();
+    const { mutateAsync } = useCreateWarehouseFix();
 
     const defaultValues = {
         name: '',

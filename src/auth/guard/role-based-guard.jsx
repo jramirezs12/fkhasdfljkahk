@@ -18,7 +18,7 @@ import { useAuthContext } from 'src/auth/hooks';
 // ----------------------------------------------------------------------
 
 export function RoleBasedGuard({ sx, children, hasContent = true, currentRole, allowedRoles: allowedRolesProp }) {
-   const { user } = useAuthContext() ?? {};
+  const { user } = useAuthContext() ?? {};
   const pathname = usePathname();
 
   const userRole = useMemo(() => {
@@ -51,13 +51,13 @@ export function RoleBasedGuard({ sx, children, hasContent = true, currentRole, a
       >
         <m.div variants={varBounce('in')}>
           <Typography variant="h3" sx={{ mb: 2 }}>
-            Permission denied
+            Permiso denegado
           </Typography>
         </m.div>
 
         <m.div variants={varBounce('in')}>
           <Typography sx={{ color: 'text.secondary' }}>
-            You do not have permission to access this page.
+            No tienes permiso para acceder a esta página.
           </Typography>
         </m.div>
 

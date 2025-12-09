@@ -1,7 +1,7 @@
 'use client';
 
 import { varAlpha } from 'minimal-shared/utils';
-import { useState, useCallback, useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';

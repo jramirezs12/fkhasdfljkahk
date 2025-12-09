@@ -15,6 +15,8 @@ import ListItemText from '@mui/material/ListItemText';
 
 import { RouterLink } from 'src/routes/components';
 
+import { getInitialsFromFirstAndLastWord } from 'src/utils/format-text';
+
 import { Iconify } from 'src/components/iconify';
 import { CustomPopover } from 'src/components/custom-popover';
 
@@ -58,6 +60,18 @@ export function WarehouseCard({ warehouse, onToggleActive }) {
             {warehouse.status === 'active' ? 'Inhabilitar' : 'Habilitar'}
           </MenuItem>
         )}
+        {warehouse.status === 'inactive' && (
+          <MenuItem
+            onClick={() => {
+              menuActions.onClose();
+              //onDelete();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            Eliminar
+          </MenuItem>
+        )}
       </MenuList>
     </CustomPopover>
   );
@@ -84,7 +98,7 @@ export function WarehouseCard({ warehouse, onToggleActive }) {
               fontSize: 20,
             }}
           >
-            {name?.[0]?.toUpperCase() || '?'}
+            {getInitialsFromFirstAndLastWord(name)}
           </Avatar>
 
           <Box sx={{ ml: 2, minWidth: 0 }}>

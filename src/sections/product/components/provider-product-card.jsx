@@ -13,9 +13,9 @@ import Typography from '@mui/material/Typography';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
-import { fCurrency } from 'src/utils/format-number';
+import { useGetWarehouses } from 'src/hooks/warehouse/useWarehouses.js';
 
-import { useGetWarehouses } from 'src/actions/warehouses/warehouses';
+import { fCurrency } from 'src/utils/format-number';
 
 import { Image } from 'src/components/image';
 

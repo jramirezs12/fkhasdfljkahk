@@ -24,6 +24,7 @@ export function useCurrentUser() {
   const dropshipping = data?.dropshipping_user ?? null;
   const roleCodeRaw = dropshipping?.role_code ?? '';
   const roleCode = typeof roleCodeRaw === 'string' ? roleCodeRaw.toLowerCase() : '';
+ 
 
   // heurística: si role_code contiene provider/prov lo consideramos provider
   const isProviderByRole = !!dropshipping && (roleCode.includes('provider') || roleCode.includes('prov'));

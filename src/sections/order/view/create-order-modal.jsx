@@ -7,18 +7,22 @@ import { useRef, useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import { useTheme } from '@mui/material/styles';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { useGetCities } from 'src/actions/order/order';
-import { fetchShippingQuote } from 'src/actions/product/shipping-quote';
-import { placeOrder, addDataToCart, createGuestCart, assignWarehouseOrder } from 'src/actions/order/cart';
+import { useGetCities } from 'src/actions/order/order'; // re-export -> canonical hook
+import {
+  usePlaceOrder,
+  useAddDataToCart,
+  useCreateGuestCart,
+  useAssignWarehouseOrder,
+} from 'src/actions/order/cart';
 
 import { Form } from 'src/components/hook-form';
 import { toast } from 'src/components/snackbar';
-
-import { STORAGE_KEY } from 'src/auth/context/login/constant';
 
 import { QuoterForm } from '../components/quoter-form';
 import { OrderSummary } from '../components/order-summary';
@@ -35,14 +39,17 @@ export const CreateOrderSchema = z.object({
 });
 
 export function CreateOrderModal({ product, open, onClose }) {
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSm = useMediaQuery(theme.breakpoints.down('md'));
+
   const providerPriceUnit = Number(product?.providerPrice ?? 0);
   const providerPrice = providerPriceUnit;
+  // set initial dropper price to the 1.8x suggested price so the form is valid by default
+  const initialDropperPrice = Math.round(providerPrice * 1.8 * 100) / 100;
 
-  const initialDropperPrice = Number(product?.providerPrice ?? 0);
-
-  const [shippingLoading, setShippingLoading] = useState(false);
-  const [shippingError, setShippingError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
 
   const methods = useForm({
     mode: 'onChange',
@@ -60,6 +67,12 @@ export function CreateOrderModal({ product, open, onClose }) {
       dropperPrice: initialDropperPrice,
       providerPrice,
       quantity: 1,
+      // quoter results (populated by QuoterForm)
+      grandTotal: 0,
+      providerTotal: 0,
+      shippingTotal: 0,
+      commissionTotal: 0,
+      profitTotal: 0,
       shippingBase: 0,
     },
   });
@@ -67,90 +80,110 @@ export function CreateOrderModal({ product, open, onClose }) {
   const {
     handleSubmit,
     watch,
-    setValue,
-    formState: { isValid },
   } = methods;
 
   const { citiesOptions = [] } = useGetCities();
 
   const watchedCity = watch('city');
-  const watchedQuantity = Number(watch('quantity') || 1);
+  const watchedNames = watch('names');
+  const watchedLastnames = watch('lastnames');
+  const watchedPhone = watch('phoneNumber');
+  const watchedEmail = watch('email');
+  const watchedAddress = watch('address');
+  const watchedQuantity = Number(watch('quantity') || 0);
+  const watchedPrice = Number(watch('dropperPrice') || NaN);
 
-  const debounceRef = useRef(null);
+  const lastCityRef = useRef(''); // persist last non-empty city
 
-  // Cotización de envío (guest, sin token)
   useEffect(() => {
-    let mounted = true;
+    const c = String(watchedCity || '').trim();
+    if (c) lastCityRef.current = c;
+  }, [watchedCity]);
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
+  const availableStock = Number(
+    product?.available ??
+      product?.availableStock ??
+      product?.stock ??
+      product?.inventory?.qty ??
+      product?.inventory?.quantity ??
+      product?.qty ??
+      0
+  );
 
-    setValue('shippingBase', 0, { shouldDirty: true });
+  // price/quantity validation (client-side rules for input validity)
+  const minAllowed = Math.round(providerPrice * 1.8 * 100) / 100;
+  const priceValid = !Number.isNaN(watchedPrice) && watchedPrice >= minAllowed;
 
-    if (!product?.id || !watchedCity) {
-      setShippingLoading(false);
-      setShippingError(null);
-      return;
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      const found = (citiesOptions || []).find((c) => String(c.value) === String(watchedCity));
-      const destinationCityName = found ? String(found.label) : String(watchedCity);
-
-      try {
-        setShippingLoading(true);
-        setShippingError(null);
-        const quote = await fetchShippingQuote(destinationCityName, Number(product.id), Number(watchedQuantity));
-        if (!mounted) return;
-        setValue('shippingBase', Number(quote.price || 0), { shouldDirty: true });
-      } catch (err) {
-        console.error('Error al obtener cotización de envío:', err);
-        if (!mounted) return;
-        setShippingError(typeof err === 'string' ? err : err?.message ?? 'No se pudo cotizar el envío');
-        setValue('shippingBase', 0, { shouldDirty: true });
-      } finally {
-        if (mounted) setShippingLoading(false);
-      }
-    }, 300);
-
-    // eslint-disable-next-line consistent-return
-    return () => {
-      mounted = false;
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-        debounceRef.current = null;
-      }
-    };
-  }, [watchedCity, watchedQuantity, product?.id, setValue, citiesOptions]);
-
-  const watchedPrice = Number(watch('dropperPrice') || 0);
-
-  // Validación mínima: precio >= proveedor
-  const priceValid = (() => {
-    if (Number.isNaN(watchedPrice)) return false;
-    if (watchedPrice < providerPrice) return false;
-    return true;
+  const quantityValid = (() => {
+    const q = Number(watchedQuantity || 0);
+    if (Number.isNaN(q) || q < 1) return false;
+    if (availableStock <= 0) return false;
+    return q <= availableStock;
   })();
+
+  // gate for submit: require client fields and that quoter produced values (grandTotal > 0)
+  useEffect(() => {
+    const stringsOk =
+      String(watchedNames || '').trim() &&
+      String(watchedLastnames || '').trim() &&
+      String(watchedPhone || '').trim() &&
+      (String(watchedCity || '').trim() || lastCityRef.current) &&
+      String(watchedEmail || '').trim() &&
+      String(watchedAddress || '').trim();
+
+    const numericOk =
+      Number.isFinite(Number(watchedQuantity)) &&
+      Number.isFinite(Number(watchedPrice));
+
+    const ok = Boolean(stringsOk && numericOk && priceValid && quantityValid && !submitting);
+    setCanSubmit(ok);
+  }, [
+    watchedNames,
+    watchedLastnames,
+    watchedPhone,
+    watchedCity,
+    watchedEmail,
+    watchedAddress,
+    watchedQuantity,
+    watchedPrice,
+    priceValid,
+    quantityValid,
+    submitting,
+  ]);
 
   function sanitizePhone(val) {
     if (!val) return '';
     return String(val).replace(/\D/g, '');
   }
 
+  const requiredKeys = ['names', 'lastnames', 'phoneNumber', 'city', 'email', 'address'];
+
+  // react-query mutations (from refactor)
+  const createGuest = useCreateGuestCart();
+  const addData = useAddDataToCart();
+  const place = usePlaceOrder();
+  const assignWarehouse = useAssignWarehouseOrder();
+
   const onSubmit = handleSubmit(async (formData) => {
+    // basic required validation
+    const missing = requiredKeys.filter((k) => !String(formData?.[k] ?? '').trim());
+    if (missing.length) return;
+
+    const qty = Number(formData.quantity || 0);
+    if (!quantityValid || qty > availableStock) return;
+    if (!priceValid) return;
+
     setSubmitting(true);
     try {
-      // 1) Crear carrito invitado
-      const cartId = await createGuestCart();
+      // 1) create guest cart
+      const cartId = await createGuest.mutateAsync();
 
-      // 2) Resolver ciudad y región
-      const cityOpt = (citiesOptions || []).find((c) => String(c.value) === String(formData.city));
-      const cityName = cityOpt?.label || '';
+      // 2) prepare fields
+      const cityVal = String(formData.city || lastCityRef.current || '').trim();
+      const cityOpt = (citiesOptions || []).find((c) => String(c.value) === cityVal);
+      const cityName = cityOpt?.label || cityVal;
       const regionId = Number(cityOpt?.regionId || 0);
 
-      // 3) Preparar datos para el carrito
       const sku = product?.sku || '';
       const quantity = Number(formData.quantity || 1);
       const dropper_price = Number(formData.dropperPrice || 0);
@@ -161,16 +194,12 @@ export function CreateOrderModal({ product, open, onClose }) {
       const street = [formData.address, formData.complemento].filter(Boolean);
 
       const email = formData.email;
-
-      // Carrier y método (según tu backend)
       const carrier_code = 'envios';
       const method_code = 'inter';
-
-      // Método de pago (de ejemplo, se puede condicionar por paymentMode)
       const payment_code = 'cashondelivery';
 
-      // 4) Agregar productos, direcciones, método de envío/pago y email al carrito (guest, sin token)
-      await addDataToCart({
+      // 3) add data to cart
+      await addData.mutateAsync({
         cartId,
         quantity,
         sku,
@@ -187,29 +216,29 @@ export function CreateOrderModal({ product, open, onClose }) {
         payment_code,
       });
 
-      // 5) Place Order (guest)
-      const magentoOrderId = await placeOrder(cartId);
+      // 4) place order
+      const magentoOrderId = await place.mutateAsync({ cartId });
 
-      // 6) Assign Warehouse Order (CON TOKEN)
-      const token =
-        typeof window !== 'undefined'
-          ? window.sessionStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(STORAGE_KEY)
-          : null;
-
-      if (!token) {
-        // Si no hay token, se puede continuar sin asignar, o mostrar advertencia
-        console.warn('No hay token disponible para asignar la orden al warehouse. Saltando ASSIGN_WAREHOUSE_ORDER.');
-      } else {
-        await assignWarehouseOrder(magentoOrderId, token);
+      // 5) try to assign warehouse (best-effort)
+      try {
+        await assignWarehouse.mutateAsync({ magento_order_id: magentoOrderId });
+      } catch (assignErr) {
+        const msg = assignErr?.message ?? String(assignErr);
+        if (msg.toLowerCase().includes('token')) {
+          console.warn('No hay token disponible para asignar la orden al warehouse. Saltando ASSIGN_WAREHOUSE_ORDER.');
+        } else {
+          throw assignErr;
+        }
       }
 
-      // 7) Mostrar snackbar de éxito y cerrar modal
       toast.success(`Orden creada correctamente: ${magentoOrderId}`);
-
       onClose?.();
     } catch (err) {
       console.error('Error en flujo de creación de orden:', err);
-      const message = typeof err === 'string' ? err : err?.message ?? 'Ocurrió un error al crear la orden';
+      const message =
+        typeof err === 'string'
+          ? err
+          : err?.message ?? 'Ocurrió un error al crear la orden';
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -221,68 +250,111 @@ export function CreateOrderModal({ product, open, onClose }) {
       open={open}
       onClose={onClose}
       fullWidth
+      fullScreen={isXs}
       maxWidth="lg"
-      slotProps={{
-        paper: {
-          sx: {
-            width: { xs: '92vw', sm: '88vw', md: '78vw', lg: '74vw', xl: '70vw' },
-            maxWidth: 'none',
-            maxHeight: '92vh',
-            overflow: 'hidden',
-            borderRadius: 2,
-          },
+      PaperProps={{
+        sx: {
+          m: { xs: 1.5, sm: 2, md: 0 },
+          width: 'calc(100% - 24px)',
+          maxWidth: isXs ? '100%' : undefined,
+          height: isXs ? '100dvh' : 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: isXs ? 1.5 : 2,
+          backgroundColor: 'background.paper',
         },
       }}
     >
-      <DialogTitle>Crear orden manual</DialogTitle>
+      <DialogTitle
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.25, sm: 2 },
+          typography: { xs: 'subtitle1', sm: 'h6' },
+          position: 'sticky',
+          top: 0,
+          zIndex: 5,
+          backgroundColor: 'background.paper',
+          borderBottom: (t) => `1px solid ${t.palette.divider}`,
+        }}
+      >
+        Crear orden manual
+      </DialogTitle>
 
-      <Form methods={methods} onSubmit={onSubmit}>
+      <Form
+        methods={methods}
+        onSubmit={onSubmit}
+        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+      >
         <DialogContent
           sx={{
-            p: 2,
-            pt: 1,
-            overflow: 'auto',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            p: { xs: 2, sm: 2.5, md: 2 },
+            overflow: 'hidden',
           }}
         >
           <Box
             sx={{
-              width: '100%',
-              maxWidth: '100%',
-              boxSizing: 'border-box',
+              flex: 1,
+              minHeight: 0,
+              overflowY: 'auto',
+              pr: { xs: 0, sm: 0.5 },
+              WebkitOverflowScrolling: 'touch',
               display: 'grid',
-              gap: 2,
+              gap: { xs: 2, sm: 2.5 },
               gridTemplateColumns: {
                 xs: '1fr',
-                md: 'minmax(0, 3fr) minmax(0, 3fr) minmax(0, 4fr)',
+                md: 'repeat(3, minmax(0, 1fr))',
               },
-              alignItems: 'start',
-              overflow: 'hidden',
             }}
           >
-            <ClientDataForm />
-            <QuoterForm />
-            <Box sx={{ display: 'grid', gap: 2 }}>
-              <ProductOrderForm product={product} />
+            {/* Columna 1: Datos cliente */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <ClientDataForm noBackground />
+            </Box>
+
+            {/* Columna 2: Cotizador - le pasamos product para que use sku */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <QuoterForm product={product} noBackground />
+            </Box>
+
+            {/* Columna 3: Producto + Resumen */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <ProductOrderForm product={product} noBackground />
               <OrderSummary />
-              {shippingLoading && (
-                <Box sx={{ typography: 'caption', color: 'text.secondary' }}>Cotizando envío...</Box>
-              )}
-              {!!shippingError && (
-                <Box sx={{ typography: 'caption', color: 'error.main' }}>{shippingError}</Box>
-              )}
             </Box>
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ px: 2, py: 1 }}>
-          <Button variant="outlined" onClick={onClose} size="small" disabled={submitting}>
+        <DialogActions
+          sx={{
+            px: { xs: 2, sm: 2.5 },
+            py: { xs: 1, sm: 1.25 },
+            gap: 1,
+            flexWrap: 'wrap',
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 5,
+            backgroundColor: 'background.paper',
+            borderTop: (t) => `1px solid ${t.palette.divider}`,
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={onClose}
+            size={isSm ? 'medium' : 'small'}
+            disabled={submitting}
+            fullWidth={isXs}
+          >
             Cancelar
           </Button>
           <Button
             type="submit"
             variant="contained"
-            size="small"
-            disabled={!isValid || !priceValid || submitting}
+            size={isSm ? 'medium' : 'small'}
+            disabled={!canSubmit}
+            fullWidth={isXs}
           >
             {submitting ? 'Creando...' : 'Crear'}
           </Button>
@@ -291,3 +363,5 @@ export function CreateOrderModal({ product, open, onClose }) {
     </Dialog>
   );
 }
+
+export default CreateOrderModal;

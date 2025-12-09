@@ -17,7 +17,7 @@ export function ProductCreateView() {
         heading="Creación de producto"
         links={[
           { name: 'Inicio', href: paths.home.root },
-          { name: 'Mis productos', href: paths.home.product.root },
+          { name: 'Mis productos', href: paths.home.root },
           { name: 'Crear producto' },
         ]}
         sx={{ mb: { xs: 3, md: 4 } }}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -12,9 +12,9 @@ import Typography from '@mui/material/Typography';
 
 import { RouterLink } from 'src/routes/components';
 
-import { fCurrency } from 'src/utils/format-number';
+import { useGetWarehouses } from 'src/hooks/warehouse/useWarehouses.js';
 
-import { useGetWarehouses } from 'src/actions/warehouses/warehouses';
+import { fCurrency } from 'src/utils/format-number';
 
 import { Image } from 'src/components/image';
 import { WishlistModal } from 'src/components/wishlist/wishlist-modal';

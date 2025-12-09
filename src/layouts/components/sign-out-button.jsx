@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 
 import Button from '@mui/material/Button';
-
-import { useRouter } from 'src/routes/hooks';
+//import { paths } from 'src/routes/paths';
+//import { useRouter } from 'src/routes/hooks';
 
 import { useAuthContext } from 'src/auth/hooks';
 import { signOut } from 'src/auth/context/login/action';
@@ -10,7 +10,7 @@ import { signOut } from 'src/auth/context/login/action';
 // ----------------------------------------------------------------------
 
 export function SignOutButton({ onClose, sx, ...other }) {
-  const router = useRouter();
+  //const router = useRouter();
 
   const { checkUserSession } = useAuthContext();
 
@@ -18,13 +18,13 @@ export function SignOutButton({ onClose, sx, ...other }) {
     try {
       await signOut();
       await checkUserSession?.();
-
       onClose?.();
-      router.refresh();
+      //router.replace(paths.auth.login);
+      //router.refresh();
     } catch (error) {
       console.error(error);
     }
-  }, [checkUserSession, onClose, router]);
+  }, [onClose, checkUserSession]);
 
   return (
     <Button

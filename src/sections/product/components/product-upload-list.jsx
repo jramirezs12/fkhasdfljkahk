@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -15,15 +15,10 @@ import ListItemText from '@mui/material/ListItemText';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
-import { Iconify } from 'src/components/iconify';
-
-import ProductUploadBulkDialog from './product-upload-bulk-dialog';
-
 // ----------------------------------------------------------------------
 
 export function ProductUploadList() {
   const router = useRouter();
-  const [openBulk, setOpenBulk] = useState(false);
 
   const goTo = (href) => router.push(href);
 
@@ -54,8 +49,7 @@ export function ProductUploadList() {
   );
 
   return (
-    <>
-      <Box
+    <Box
         sx={{
           gap: 3,
           display: 'grid',
@@ -73,12 +67,8 @@ export function ProductUploadList() {
               'Gestiona grandes volúmenes de productos.',
             ])}
             <Box sx={{ flexGrow: 1 }} />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setOpenBulk(true)}
-            >
-              Cargar archivos
+            <Button variant="contained" color="primary" onClick={() => goTo(paths.home.product.uploadList)}>
+              Carga de archivos
             </Button>
           </Stack>
         </Card>
@@ -99,7 +89,7 @@ export function ProductUploadList() {
               color="primary"
               onClick={() => goTo(paths.home.product.create)}
             >
-              Cargar productos
+              Crear producto
             </Button>
           </Stack>
         </Card>
@@ -125,8 +115,7 @@ export function ProductUploadList() {
           </Stack>
         </Card>
       </Box>
-
-      <ProductUploadBulkDialog open={openBulk} onClose={() => setOpenBulk(false)} />
-    </>
   );
 }
+
+export default ProductUploadList;

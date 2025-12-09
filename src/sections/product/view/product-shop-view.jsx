@@ -24,8 +24,8 @@ import { EmptyContent } from 'src/components/empty-content';
 import { CartIcon } from '../components/cart-icon';
 import { ProductList } from '../components/product-list';
 import { ProductSort } from '../components/product-sort';
-import { ProductSearch } from '../components/product-search';
 import { useCheckoutContext } from '../../checkout/context';
+import { ProductSearch } from '../components/product-search';
 import { ProductFiltersDrawer } from '../components/product-filters-drawer';
 import { ProductFiltersResult } from '../components/product-filters-result';
 

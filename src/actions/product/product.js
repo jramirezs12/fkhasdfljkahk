@@ -1,55 +1,21 @@
 'use client';
 
-/**
- * =========================================================================================
- * HOOKS DE PRODUCTOS (GraphQL + React Query + SWR)
- * =========================================================================================
- * Objetivos:
- *  1) Cargar productos paginados desde Magento GraphQL.
- *  2) Scroll infinito con prefetch especulativo de la página siguiente para "reveal" instantáneo.
- *  3) Tolerar respuestas parciales (GraphQL data + errors): aprovechar data aunque existan errores.
- *  4) Deduplicar productos entre páginas (por SKU o UID).
- *  5) Mantener un hook paginado clásico (SWR) para componentes como autocomplete.
- *  6) Incluir un filtro neutro automático cuando el backend exige "filter" pero el usuario no aplicó ninguno.
- *
- * Diseño:
- *  - useInfiniteProducts (React Query):
- *      * useInfiniteQuery controla las páginas "visibles" (pages[]).
- *      * Se precarga la página N+1 en background (prefetch) al momento que llega N.
- *      * loadMore() revela instantáneamente si la N+1 ya está en caché (sin esperar red).
- *      * Si no está prefetched, hace fetchNextPage normal.
- *  - useGetProducts (SWR): una sola página, útil para búsquedas/sugerencias.
- *  - ensureFilter(filter): evita error cuando Magento exige "filter" siempre.
- *  - adaptItemToRow(item): normaliza el shape que consume la UI.
- *  - dedupe(items): previene repetidos por mezclas de páginas.
- *
- * Uso típico:
- *   const { products, hasMore, loadMore } = useInfiniteProducts({ filter: {...}, pageSize: 24 });
- *   <ProductList products={products} hasMore={hasMore} onLoadMore={loadMore} />
- *
- * =========================================================================================
- */
-
 import useSWR from 'swr';
 import { useMemo, useCallback } from 'react';
-import { useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 
 import graphqlClient from 'src/lib/graphqlClient';
+import { useProductStore } from 'src/store/productStore';
 
-import { PRODUCT_LIST } from './queries';
+import { PRODUCT_LIST, PRODUCT_BY_SKU } from './queries';
 
-// ------------------------------------------------------------------
-// Opciones base de SWR (para los otros hooks)
-// ------------------------------------------------------------------
+// helpers (unchanged, compacted)
 const swrOptions = {
   revalidateIfStale: false,
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
 };
 
-// ------------------------------------------------------------------
-// Helpers
-// ------------------------------------------------------------------
 function ensureFilter(filter) {
   if (filter && Object.keys(filter).length > 0) return filter;
   return { price: { from: '0' } };
@@ -81,7 +47,7 @@ function adaptItemToRow(item) {
       warehouseId = wp.warehouse_id ?? null;
     }
     if (warehouseId !== null) warehouseId = String(warehouseId);
-  } catch (err) {
+  } catch {
     warehouseId = null;
   }
 
@@ -115,31 +81,20 @@ function dedupe(items) {
   return [...m.values()];
 }
 
-// ------------------------------------------------------------------
-// Función externa getNextPageParam (NO usar query.options interno)
-// ------------------------------------------------------------------
-function getNextPageParam(lastPage, allPages) {
+function getNextPageParam(lastPage) {
   if (!lastPage) return undefined;
   const curr = lastPage._page ?? 1;
   const total = lastPage.page_info?.total_pages ?? 1;
   return curr < total ? curr + 1 : undefined;
 }
 
-// ==================================================================
-// Hook infinito (React Query) con prefetch de siguiente página
-// ==================================================================
-export function useInfiniteProducts({
-  filter = {},
-  pageSize = 24,
-  prefetchAhead = 1, // 1 = precargar solo la siguiente
-} = {}) {
+// ----------------------------- infinite hook (react-query) -----------------------------
+export function useInfiniteProducts({ filter = {}, pageSize = 24, prefetchAhead = 1 } = {}) {
   const queryClient = useQueryClient();
   const normalized = ensureFilter(filter);
+  const filterKey = JSON.stringify(normalized);
+  const infiniteKey = ['products-infinite', pageSize, filterKey];
 
-  const filterKey = useMemo(() => JSON.stringify(normalized), [normalized]);
-  const infiniteKey = useMemo(() => ['products-infinite', pageSize, filterKey], [pageSize, filterKey]);
-
-  // Fetch tolerante a parciales de UNA página
   const fetchPage = useCallback(
     async (page) => {
       try {
@@ -148,7 +103,7 @@ export function useInfiniteProducts({
           pageSize,
           filter: normalized,
         });
-        return { ...res.dropshippingProducts , _page: page };
+        return { ...res.dropshippingProducts, _page: page };
       } catch (err) {
         const partial = err?.response?.data?.dropshippingProducts;
         if (partial) return { ...partial, _page: page };
@@ -161,15 +116,13 @@ export function useInfiniteProducts({
   const query = useInfiniteQuery({
     queryKey: infiniteKey,
     initialPageParam: 1,
-    queryFn: ({ pageParam }) => fetchPage(pageParam),
-    getNextPageParam: (lastPage, pages) => getNextPageParam(lastPage, pages),
+    queryFn: ({ pageParam = 1 }) => fetchPage(pageParam),
+    getNextPageParam,
     onSuccess: (data) => {
       if (!prefetchAhead) return;
       const last = data.pages[data.pages.length - 1];
-      const next = getNextPageParam(last, data.pages);
+      const next = getNextPageParam(last);
       if (!next) return;
-
-      // Prefetch en background
       const prefetchKey = ['products-page', pageSize, filterKey, next];
       queryClient.prefetchQuery({
         queryKey: prefetchKey,
@@ -185,24 +138,14 @@ export function useInfiniteProducts({
   }, [query.data]);
 
   const hasMore = !!query.hasNextPage;
-
-  const loadMore = useCallback(async () => {
-    // Guards defensivos
+  const loadMore = async () => {
     if (!hasMore) return;
-    if (!query.data) {
-      // Aún no se ha cargado la primera página
-      return;
-    }
-
-    const last = query.data.pages[query.data.pages.length - 1];
-    const next = getNextPageParam(last, query.data.pages);
+    const last = query.data?.pages?.[query.data.pages.length - 1];
+    const next = getNextPageParam(last);
     if (!next) return;
-
     const prefetchKey = ['products-page', pageSize, filterKey, next];
     const prefetched = queryClient.getQueryData(prefetchKey);
-
     if (prefetched) {
-      // Reveal instantáneo
       queryClient.setQueryData(infiniteKey, (old) => {
         if (!old) return old;
         const exists = old.pages.some((p) => p._page === next);
@@ -211,40 +154,23 @@ export function useInfiniteProducts({
       });
       return;
     }
-
     await query.fetchNextPage();
-  }, [hasMore, query, pageSize, filterKey, queryClient, infiniteKey]);
-
-  const productsLoading = query.isLoading && !query.data;
-  const isLoadingMore = query.isFetchingNextPage;
-  const productsError = query.error ?? null;
-  const productsValidating = query.isFetching && !query.isFetchingNextPage;
-
-  const totalPages =
-    query.data?.pages?.[query.data.pages.length - 1]?.page_info?.total_pages ??
-    query.data?.pages?.[0]?.page_info?.total_pages ??
-    1;
-
-  const totalCount =
-    query.data?.pages?.[query.data.pages.length - 1]?.total_count ??
-    products.length;
+  };
 
   return {
     products,
-    productsLoading,
-    productsError,
-    productsValidating,
+    productsLoading: query.isLoading && !query.data,
+    productsError: query.error ?? null,
+    productsValidating: query.isFetching && !query.isFetchingNextPage,
     hasMore,
-    isLoadingMore,
+    isLoadingMore: query.isFetchingNextPage,
     loadMore,
-    totalPages,
-    totalCount,
+    totalPages: query.data?.pages?.[query.data.pages.length - 1]?.page_info?.total_pages ?? 1,
+    totalCount: query.data?.pages?.[query.data.pages.length - 1]?.total_count ?? products.length,
   };
 }
 
-// ==================================================================
-// Paginado simple (SWR) — para autocomplete u otras vistas
-// ==================================================================
+// ----------------------------- paged SWR hook (backwards compat) -----------------------------
 export function useGetProducts(params = {}) {
   const currentPage = params?.currentPage ?? 1;
   const pageSize = params?.pageSize ?? 24;
@@ -260,9 +186,9 @@ export function useGetProducts(params = {}) {
     };
     try {
       const res = await graphqlClient.request(PRODUCT_LIST, variables);
-      return res?.dropshippingProducts  ?? null;
+      return res?.dropshippingProducts ?? null;
     } catch (err) {
-      const partial = err?.response?.data?.dropshippingProducts ;
+      const partial = err?.response?.data?.dropshippingProducts;
       if (partial) return partial;
       return null;
     }
@@ -283,5 +209,40 @@ export function useGetProducts(params = {}) {
     productsEmpty: !isLoading && !isValidating && products.length === 0,
     totalCount: data?.total_count ?? products.length,
     totalPages: data?.page_info?.total_pages ?? 1,
+  };
+}
+
+// ----------------------------- single product fetch hook (react-query + zustand) -----------------------------
+export function useGetProduct(sku, { enabled = true } = {}) {
+  const storeSet = useProductStore((s) => s.setProduct);
+  const storeGet = useProductStore((s) => s.getProduct);
+
+  const queryKey = ['product', String(sku)];
+
+  const query = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const res = await graphqlClient.request(PRODUCT_BY_SKU, { sku: String(sku) });
+      const items = res?.dropshippingProducts?.items || [];
+      if (!items.length) return null;
+      const adapted = adaptItemToRow(items[0]);
+      // store
+      try {
+        storeSet(String(sku), adapted);
+      } catch { /* empty */ }
+      return adapted;
+    },
+    enabled: Boolean(sku) && enabled,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 30,
+  });
+
+  // if we have local cache return it synchronously as initialData
+  const cached = storeGet(String(sku));
+  return {
+    product: query.data ?? cached ?? null,
+    loading: query.isLoading,
+    error: query.error ?? null,
+    refetch: query.refetch,
   };
 }

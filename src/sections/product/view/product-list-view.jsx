@@ -6,17 +6,14 @@ import { useMemo, useState, useCallback } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
 import { HomeContent } from 'src/layouts/home';
 import { useProductFeedStore } from 'src/store/productFeed';
-import { useGetCategories } from 'src/actions/category/category';
 import { useInfiniteProducts } from 'src/actions/product/product';
+import { useCategories } from 'src/actions/category/useCategories';
 
-import { Iconify } from 'src/components/iconify';
 import { EmptyContent } from 'src/components/empty-content';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
@@ -48,7 +45,7 @@ export function ProductListView() {
   };
   const currentFilters = filters.state;
 
-  const { categoriesOptions } = useGetCategories();
+  const { categoriesOptions } = useCategories();
 
   const serverFilter = useMemo(() => {
     const f = {};
@@ -98,16 +95,6 @@ export function ProductListView() {
           { name: 'Mis Productos', href: paths.home.product.root },
           { name: 'Lista' },
         ]}
-        action={
-          <Button
-            component={RouterLink}
-            href={paths.home.product.create}
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-          >
-            Add product
-          </Button>
-        }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -178,7 +165,7 @@ export function ProductListView() {
  * - categories, stock, publish: arrays de valores activos
  */
 function applyFilter({ inputData, filters, sortBy }) {
-  const { categories, stock, publish } = filters;
+  const { categories, stock } = filters;
   let data = Array.isArray(inputData) ? [...inputData] : [];
 
   // Orden

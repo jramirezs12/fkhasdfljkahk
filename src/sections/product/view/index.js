@@ -18,5 +18,8 @@ export * from './provider-products-view';
 
 export * from './product-integration-view';
 
+export * from './upload-product-list-view';
+
 export * from './product-shop-details-view';
 
+export * from './siigo-integration-history-view';
